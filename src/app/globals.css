@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --accent: #0d9488;
+    --accent-hover: #0f766e;
+    --accent-light: #ccfbf1;
+  }
+
+  .dark {
+    --bg-page: #090d16;
+    --bg-card: #111827;
+    --border-color: #1f293d;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #14b8a6;
+    --accent-hover: #2dd4bf;
+    --accent-light: rgba(20, 184, 166, 0.15);
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Glassmorphism helpers */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dark .glass {
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Status Badges */
+.badge-saved {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.dark .badge-saved {
+  background-color: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+.badge-applied {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.dark .badge-applied {
+  background-color: rgba(3, 105, 161, 0.2);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.badge-interview {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.dark .badge-interview {
+  background-color: rgba(21, 128, 61, 0.2);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.badge-offer {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.dark .badge-offer {
+  background-color: rgba(180, 83, 9, 0.2);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.badge-rejected {
+  background-color: #ffe4e6;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+.dark .badge-rejected {
+  background-color: rgba(190, 18, 60, 0.2);
+  color: #fb7185;
+  border-color: rgba(251, 113, 133, 0.3);
+}
+
+.badge-ghosted {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+.dark .badge-ghosted {
+  background-color: rgba(126, 34, 206, 0.2);
+  color: #c084fc;
+  border-color: rgba(192, 132, 252, 0.3);
+}
+
+/* Animations */
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 2.5s infinite ease-in-out;
 }
