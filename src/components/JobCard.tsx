@@ -3,7 +3,7 @@
 import React from 'react';
 import { Job, JobStatus } from '@/types/job';
 import { STATUS_LIST } from './FilterBar';
-import { ExternalLink, Calendar, MapPin, DollarSign, Image as ImageIcon, Clock, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { ExternalLink, Calendar, MapPin, Image as ImageIcon, Clock, Trash2, Edit2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface JobCardProps {
@@ -22,60 +22,73 @@ export const JobCard: React.FC<JobCardProps> = ({
   onDelete,
   onStatusChange,
 }) => {
-  const isDue = Boolean(todayStr && job.followup_date && job.followup_date <= todayStr && (job.status === 'Applied' || job.status === 'Interview'));
-  const isOverdue = Boolean(todayStr && job.followup_date && job.followup_date < todayStr && (job.status === 'Applied' || job.status === 'Interview'));
+  const isDue = Boolean(
+    todayStr &&
+    job.followup_date &&
+    job.followup_date <= todayStr &&
+    (job.status === 'Applied' || job.status === 'Interview')
+  );
 
   const handleStatusSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.stopPropagation();
     const nextStatus = e.target.value as JobStatus;
     if (nextStatus === 'Offer') {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
+      confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
     }
     onStatusChange(job, nextStatus);
   };
 
-  const getStatusBadgeClass = (status: JobStatus) => {
+  const getBorderLeftColor = (status: JobStatus) => {
     switch (status) {
-      case 'Saved': return 'badge-saved';
-      case 'Applied': return 'badge-applied';
-      case 'Interview': return 'badge-interview';
-      case 'Offer': return 'badge-offer';
-      case 'Rejected': return 'badge-rejected';
-      case 'Ghosted': return 'badge-ghosted';
+      case 'Saved': return 'border-l-[#a5b2ae] dark:border-l-[#3a4e47]';
+      case 'Applied': return 'border-l-[#5d9fd6] dark:border-l-[#2a557b]';
+      case 'Interview': return 'border-l-[#3bb36a] dark:border-l-[#20633b]';
+      case 'Offer': return 'border-l-[#dba400] dark:border-l-[#6e550e]';
+      case 'Rejected': return 'border-l-[#d4624b] dark:border-l-[#682e22]';
+      case 'Ghosted': return 'border-l-[#887da1] dark:border-l-[#493f5d]';
+    }
+  };
+
+  const getStatusClass = (status: JobStatus) => {
+    switch (status) {
+      case 'Saved': return 'status-saved';
+      case 'Applied': return 'status-applied';
+      case 'Interview': return 'status-interview';
+      case 'Offer': return 'status-offer';
+      case 'Rejected': return 'status-rejected';
+      case 'Ghosted': return 'status-ghosted';
     }
   };
 
   return (
     <div
       onClick={() => onEdit(job)}
-      className={`group relative p-4 rounded-2xl bg-white dark:bg-slate-900 border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:border-emerald-500/50 flex flex-col justify-between gap-3 ${
-        isDue ? 'border-rose-300 dark:border-rose-900/60 ring-1 ring-rose-300/50' : 'border-slate-200/80 dark:border-slate-800'
-      }`}
+      className={`group relative p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] border-l-5 ${getBorderLeftColor(
+        job.status
+      )} transition-all duration-150 hover:border-[var(--muted)]/60 cursor-pointer flex flex-col justify-between gap-2.5 shadow-2xs`}
     >
       <div>
-        {/* Top Header: Company & Status Selector */}
+        {/* Row 1: Company & Status Selector */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="font-bold text-base text-slate-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            <h3 className="font-bold text-[15px] text-[var(--ink)] leading-snug truncate">
               {job.company}
             </h3>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
+            <p className="text-xs text-[var(--muted)] font-medium truncate mt-0.5">
               {job.title}
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
             <select
               value={job.status}
               onChange={handleStatusSelect}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg border focus:outline-none cursor-pointer transition-colors ${getStatusBadgeClass(job.status)}`}
+              className={`status-badge ${getStatusClass(
+                job.status
+              )} focus:outline-none cursor-pointer appearance-none text-center`}
             >
               {STATUS_LIST.map((st) => (
-                <option key={st} value={st} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-normal">
+                <option key={st} value={st} className="bg-[var(--surface)] text-[var(--ink)] font-normal">
                   {st}
                 </option>
               ))}
@@ -83,83 +96,73 @@ export const JobCard: React.FC<JobCardProps> = ({
           </div>
         </div>
 
-        {/* Due follow-up alert pill */}
+        {/* Due Follow-up banner */}
         {isDue && (
-          <div className="mt-2.5 px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/80 text-rose-700 dark:text-rose-300 text-[11px] font-semibold flex items-center gap-1.5 animate-pulse-subtle">
-            <Clock className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-            <span>{isOverdue ? 'Follow-up is overdue!' : 'Follow-up is due today!'}</span>
+          <div className="mt-2 text-[11px] font-semibold text-[var(--danger)] flex items-center gap-1 bg-[var(--danger)]/8 px-2 py-0.5 rounded-md">
+            <Clock className="w-3 h-3 shrink-0" />
+            <span>Follow-up is due</span>
           </div>
         )}
 
-        {/* Tags & Pills */}
-        <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
-          {job.workplace && (
-            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium border border-slate-200/60 dark:border-slate-700">
-              {job.workplace}
-            </span>
-          )}
-          {job.location && (
-            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1 border border-slate-200/60 dark:border-slate-700 truncate max-w-[160px]">
-              <MapPin className="w-3 h-3 shrink-0" /> {job.location}
-            </span>
-          )}
-          {job.salary && (
-            <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-1 border border-emerald-200/60 dark:border-emerald-800/50">
-              <DollarSign className="w-3 h-3 shrink-0" /> {job.salary}
-            </span>
-          )}
-        </div>
-
         {/* Notes preview */}
         {job.notes && (
-          <p className="mt-2.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+          <p className="mt-2 text-xs text-[var(--muted)] line-clamp-2 leading-relaxed">
             {job.notes}
           </p>
         )}
       </div>
 
-      {/* Card Footer */}
-      <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-        <div className="flex items-center gap-3">
-          {job.applied_date ? (
+      {/* Metadata strip */}
+      <div className="pt-2 border-t border-[var(--line-subtle)] flex items-center justify-between text-[11px] text-[var(--muted)]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {job.applied_date && (
             <span className="flex items-center gap-1" title="Date Applied">
-              <Calendar className="w-3.5 h-3.5" /> {job.applied_date}
+              <Calendar className="w-3 h-3" />
+              <span>{job.applied_date}</span>
             </span>
-          ) : (
-            <span className="text-slate-400">Not applied yet</span>
           )}
+
+          {job.location && (
+            <span className="flex items-center gap-1 truncate max-w-[120px]" title="Location">
+              <MapPin className="w-3 h-3 shrink-0" />
+              <span className="truncate">{job.location}</span>
+            </span>
+          )}
+
           {job.screenshots && job.screenshots.length > 0 && (
-            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium" title="Screenshots saved">
-              <ImageIcon className="w-3.5 h-3.5" /> {job.screenshots.length}
+            <span className="flex items-center gap-1 text-[var(--accent)] font-medium" title="Screenshots">
+              <ImageIcon className="w-3 h-3" />
+              <span>{job.screenshots.length}</span>
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        {/* Quick actions (reveal on hover) */}
+        <div className="flex items-center gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
           {job.link && (
             <a
               href={job.link}
               target="_blank"
               rel="noreferrer"
-              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-              title="Open Job Link"
+              className="p-1 rounded text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] transition-colors"
+              title="Open job link"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3 h-3" />
             </a>
           )}
           <button
             onClick={() => onEdit(job)}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-            title="Edit Application"
+            className="p-1 rounded text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] transition-colors"
+            title="Edit"
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <Edit2 className="w-3 h-3" />
           </button>
           <button
             onClick={() => onDelete(job.id)}
-            className="p-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/50 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-            title="Delete Application"
+            className="p-1 rounded text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--surface-subtle)] transition-colors"
+            title="Delete"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3 h-3" />
           </button>
         </div>
       </div>

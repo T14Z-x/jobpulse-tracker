@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Database, CheckCircle, AlertTriangle, Copy, Check, RefreshCw, ArrowUpRight, HelpCircle } from 'lucide-react';
+import { X, Database, CheckCircle, AlertTriangle, Copy, Check, RefreshCw, ArrowUpRight } from 'lucide-react';
 import { getStoredSupabaseConfig, saveStoredSupabaseConfig, testSupabaseConnection } from '@/lib/supabase';
 import { syncLocalToSupabase } from '@/lib/storage';
 
@@ -77,9 +77,9 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
       setTesting(false);
       setTestResult({
         success: false,
-        message: 'Running in Local Storage Mode (Offline/In-Browser). Enter URL and Key to connect Supabase.',
+        message: 'Running in local storage mode. Enter credentials to connect Supabase.',
       });
-      onNotify('info', 'Switched to Local Storage Mode');
+      onNotify('info', 'Switched to local storage');
       onRefreshData();
       return;
     }
@@ -89,7 +89,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
     setTestResult(res);
 
     if (res.success) {
-      onNotify('success', 'Supabase credentials saved and verified!');
+      onNotify('success', 'Supabase credentials verified');
       onRefreshData();
     } else {
       onNotify('error', res.message);
@@ -100,7 +100,7 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
     navigator.clipboard.writeText(SUPABASE_SCHEMA_SQL);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2000);
-    onNotify('success', 'SQL Schema copied to clipboard!');
+    onNotify('success', 'SQL schema copied');
   };
 
   const handleSyncToSupabase = async () => {
@@ -111,128 +111,121 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
     if (res.error) {
       onNotify('error', `Sync failed: ${res.error}`);
     } else {
-      onNotify('success', `Successfully synced ${res.syncedCount} application(s) to Supabase!`);
+      onNotify('success', `Synced ${res.syncedCount} application(s) to Supabase`);
       onRefreshData();
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 my-8 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-[var(--surface)] text-[var(--ink)] rounded-2xl shadow-xl border border-[var(--line)] p-5 my-8">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[var(--line)]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl border border-emerald-200 dark:border-emerald-800/80 text-emerald-600 dark:text-emerald-400">
-              <Database className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] flex items-center justify-center">
+              <Database className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Supabase Cloud Database</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Sync applications across all your devices or host on Vercel
-              </p>
+              <h2 className="text-base font-bold tracking-tight">Supabase Database</h2>
+              <p className="text-xs text-[var(--muted)]">Sync applications across devices or host on Vercel</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-4 space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
-              Supabase Project URL
+            <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+              Project URL
             </label>
             <input
               type="text"
               placeholder="https://xyzcompany.supabase.co"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-xs font-mono focus:outline-none focus:border-[var(--accent)]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
-              Supabase Anon Public API Key
+            <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+              Anon public API key
             </label>
             <input
               type="password"
-              placeholder="eyJh..."
+              placeholder="eyJhbGciOiJIUzI1Ni..."
               value={anonKey}
               onChange={(e) => setAnonKey(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-xs font-mono focus:outline-none focus:border-[var(--accent)]"
             />
           </div>
 
           {testResult && (
             <div
-              className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 ${
+              className={`p-3 rounded-lg text-xs flex items-start gap-2 border ${
                 testResult.success
-                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                  : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                  ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/20'
+                  : 'bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/20'
               }`}
             >
               {testResult.success ? (
-                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5 text-emerald-500" />
+                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
               ) : (
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               )}
               <span>{testResult.message}</span>
             </div>
           )}
 
           {/* Setup Instructions */}
-          <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                <HelpCircle className="w-4 h-4 text-emerald-500" />
-                Quick 2-Minute Supabase Setup
-              </span>
+          <div className="p-3.5 bg-[var(--surface-subtle)] rounded-xl border border-[var(--line)] space-y-2.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-[var(--ink)]">Setup Instructions</span>
               <a
                 href="https://supabase.com/dashboard"
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                className="text-[var(--accent)] hover:underline flex items-center gap-1 font-medium"
               >
-                Open Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
+                Supabase Dashboard <ArrowUpRight className="w-3 h-3" />
               </a>
             </div>
-            <ol className="text-xs text-slate-500 dark:text-slate-400 space-y-1.5 list-decimal list-inside leading-relaxed">
-              <li>Create a free project at <b>supabase.com</b>.</li>
-              <li>Go to <b>SQL Editor</b>, paste the schema below, and click <b>Run</b>.</li>
-              <li>Go to <b>Project Settings → API</b> and copy your URL & Anon Key into the boxes above.</li>
-            </ol>
+            <p className="text-xs text-[var(--muted)] leading-relaxed">
+              Create a free Supabase project, run the SQL schema in the SQL Editor, and paste your API keys above.
+            </p>
             <div className="pt-1 flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleCopySql}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--ink)] text-xs font-medium rounded-lg transition-colors cursor-pointer"
               >
-                {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                {copiedSql ? 'Copied to Clipboard!' : 'Copy SQL Schema'}
+                {copiedSql ? <Check className="w-3.5 h-3.5 text-[var(--accent)]" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedSql ? 'Copied to clipboard' : 'Copy SQL schema'}
               </button>
               {url && anonKey && (
                 <button
                   type="button"
                   onClick={handleSyncToSupabase}
                   disabled={syncing}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)] hover:opacity-90 text-[var(--accent-ink)] text-xs font-medium rounded-lg transition-opacity cursor-pointer disabled:opacity-50"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-                  {syncing ? 'Syncing...' : 'Upload Local Data to Supabase'}
+                  {syncing ? 'Syncing...' : 'Sync local to Supabase'}
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="mt-5 flex items-center justify-end gap-2 pt-3 border-t border-[var(--line)]">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+            className="px-3.5 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] rounded-lg transition-colors cursor-pointer"
           >
             Close
           </button>
@@ -240,10 +233,10 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({
             type="button"
             onClick={handleSaveAndTest}
             disabled={testing}
-            className="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-1.5 text-xs font-semibold bg-[var(--accent)] hover:opacity-90 text-[var(--accent-ink)] rounded-lg transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
           >
-            {testing && <RefreshCw className="w-4 h-4 animate-spin" />}
-            Save & Test Connection
+            {testing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+            Save & test connection
           </button>
         </div>
       </div>

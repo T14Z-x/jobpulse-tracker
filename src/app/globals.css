@@ -2,136 +2,153 @@
 
 @layer base {
   :root {
-    --bg-page: #f8fafc;
-    --bg-card: #ffffff;
-    --border-color: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --accent: #0d9488;
-    --accent-hover: #0f766e;
-    --accent-light: #ccfbf1;
+    --bg: #f2f5f4;
+    --surface: #ffffff;
+    --surface-hover: #fafcfb;
+    --surface-subtle: #ebf0ee;
+    --ink: #14231f;
+    --muted: #5d6f69;
+    --line: #d9e2df;
+    --line-subtle: #e6edea;
+    --accent: #0f6b5c;
+    --accent-hover: #0a4f44;
+    --accent-light: #e4f2ee;
+    --accent-ink: #ffffff;
+    --danger: #b3261e;
+    --danger-light: #fbeae9;
+
+    --s-saved-bg: #e6eae8;
+    --s-saved-ink: #3f4d49;
+    --s-saved-line: #cbd4d1;
+
+    --s-applied-bg: #e1eef9;
+    --s-applied-ink: #185287;
+    --s-applied-line: #bfdaf2;
+
+    --s-interview-bg: #d7f1df;
+    --s-interview-ink: #16693a;
+    --s-interview-line: #b7e5c5;
+
+    --s-offer-bg: #fbeea9;
+    --s-offer-ink: #755700;
+    --s-offer-line: #edd874;
+
+    --s-rejected-bg: #fadcd5;
+    --s-rejected-ink: #87281c;
+    --s-rejected-line: #f1b9ae;
+
+    --s-ghosted-bg: #ece9f3;
+    --s-ghosted-ink: #554871;
+    --s-ghosted-line: #d4cee2;
   }
 
   .dark {
-    --bg-page: #090d16;
-    --bg-card: #111827;
-    --border-color: #1f293d;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --accent: #14b8a6;
-    --accent-hover: #2dd4bf;
-    --accent-light: rgba(20, 184, 166, 0.15);
+    --bg: #0d1513;
+    --surface: #141f1c;
+    --surface-hover: #192723;
+    --surface-subtle: #192622;
+    --ink: #e6efec;
+    --muted: #8ca29b;
+    --line: #243530;
+    --line-subtle: #1c2b27;
+    --accent: #3db89f;
+    --accent-hover: #50caa0;
+    --accent-light: rgba(61, 184, 159, 0.12);
+    --accent-ink: #051d18;
+    --danger: #ff8a80;
+    --danger-light: rgba(255, 138, 128, 0.12);
+
+    --s-saved-bg: #222d2a;
+    --s-saved-ink: #a5b6b1;
+    --s-saved-line: #313f3b;
+
+    --s-applied-bg: #172c3d;
+    --s-applied-ink: #7db8ed;
+    --s-applied-line: #22415a;
+
+    --s-interview-bg: #173827;
+    --s-interview-ink: #5fd891;
+    --s-interview-line: #234f37;
+
+    --s-offer-bg: #3d3210;
+    --s-offer-ink: #f0cb53;
+    --s-offer-line: #5a4918;
+
+    --s-rejected-bg: #3c2019;
+    --s-rejected-ink: #f08375;
+    --s-rejected-line: #572d24;
+
+    --s-ghosted-bg: #282334;
+    --s-ghosted-ink: #aba0c7;
+    --s-ghosted-line: #3b334c;
   }
 }
 
 body {
-  background-color: var(--bg-page);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow-x: hidden;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbar */
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-width: 1px;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+}
+
+.status-saved {
+  background-color: var(--s-saved-bg);
+  color: var(--s-saved-ink);
+  border-color: var(--s-saved-line);
+}
+.status-applied {
+  background-color: var(--s-applied-bg);
+  color: var(--s-applied-ink);
+  border-color: var(--s-applied-line);
+}
+.status-interview {
+  background-color: var(--s-interview-bg);
+  color: var(--s-interview-ink);
+  border-color: var(--s-interview-line);
+}
+.status-offer {
+  background-color: var(--s-offer-bg);
+  color: var(--s-offer-ink);
+  border-color: var(--s-offer-line);
+}
+.status-rejected {
+  background-color: var(--s-rejected-bg);
+  color: var(--s-rejected-ink);
+  border-color: var(--s-rejected-line);
+}
+.status-ghosted {
+  background-color: var(--s-ghosted-bg);
+  color: var(--s-ghosted-ink);
+  border-color: var(--s-ghosted-line);
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: var(--line);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
-
-/* Glassmorphism helpers */
-.glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.dark .glass {
-  background: rgba(17, 24, 39, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Status Badges */
-.badge-saved {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-}
-.dark .badge-saved {
-  background-color: #1e293b;
-  color: #94a3b8;
-  border-color: #334155;
-}
-
-.badge-applied {
-  background-color: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-}
-.dark .badge-applied {
-  background-color: rgba(3, 105, 161, 0.2);
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.3);
-}
-
-.badge-interview {
-  background-color: #dcfce7;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
-}
-.dark .badge-interview {
-  background-color: rgba(21, 128, 61, 0.2);
-  color: #4ade80;
-  border-color: rgba(74, 222, 128, 0.3);
-}
-
-.badge-offer {
-  background-color: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fde68a;
-}
-.dark .badge-offer {
-  background-color: rgba(180, 83, 9, 0.2);
-  color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-.badge-rejected {
-  background-color: #ffe4e6;
-  color: #be123c;
-  border: 1px solid #fecdd3;
-}
-.dark .badge-rejected {
-  background-color: rgba(190, 18, 60, 0.2);
-  color: #fb7185;
-  border-color: rgba(251, 113, 133, 0.3);
-}
-
-.badge-ghosted {
-  background-color: #f3e8ff;
-  color: #7e22ce;
-  border: 1px solid #e9d5ff;
-}
-.dark .badge-ghosted {
-  background-color: rgba(126, 34, 206, 0.2);
-  color: #c084fc;
-  border-color: rgba(192, 132, 252, 0.3);
-}
-
-/* Animations */
-@keyframes pulseSubtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.02); }
-}
-
-.animate-pulse-subtle {
-  animation: pulseSubtle 2.5s infinite ease-in-out;
+  background: var(--muted);
 }

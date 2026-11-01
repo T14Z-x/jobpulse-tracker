@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Job, JobStatus, WorkplaceType, JobType } from '@/types/job';
 import { STATUS_LIST } from './FilterBar';
-import { saveScreenshot, getScreenshot, deleteScreenshot, compressImage } from '@/lib/idb';
+import { saveScreenshot, getScreenshot, compressImage } from '@/lib/idb';
 import { X, Upload, Trash2, Calendar, Link as LinkIcon, DollarSign, MapPin, User, Mail, Tag, FileText, Image as ImageIcon } from 'lucide-react';
 
 interface JobModalProps {
   isOpen: boolean;
-  job: Job | null; // null for new job
+  job: Job | null;
   initialStatus?: JobStatus;
   onClose: () => void;
   onSave: (job: Job) => void;
@@ -81,7 +81,6 @@ export const JobModal: React.FC<JobModalProps> = ({
       setNotes(job.notes || '');
       setTagInput((job.tags || []).join(', '));
 
-      // Load existing screenshots from IndexedDB
       const loadImages = async () => {
         const loaded: LoadedScreenshot[] = [];
         for (const sid of job.screenshots || []) {
@@ -98,7 +97,6 @@ export const JobModal: React.FC<JobModalProps> = ({
       };
       loadImages();
     } else {
-      // New Job defaults
       setCompany('');
       setTitle('');
       setLink('');
@@ -119,7 +117,6 @@ export const JobModal: React.FC<JobModalProps> = ({
     }
   }, [isOpen, job, initialStatus]);
 
-  // Handle Clipboard Paste
   useEffect(() => {
     if (!isOpen) return;
 
@@ -150,9 +147,9 @@ export const JobModal: React.FC<JobModalProps> = ({
       const compressed = await compressImage(file);
       const newId = 'img_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       setScreenshots((prev) => [...prev, { id: newId, data: compressed, isNew: true }]);
-      onNotify('success', 'Screenshot added!');
+      onNotify('success', 'Screenshot added');
     } catch {
-      onNotify('error', 'Failed to process screenshot.');
+      onNotify('error', 'Failed to process screenshot');
     }
   };
 
@@ -187,14 +184,13 @@ export const JobModal: React.FC<JobModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!company.trim() || !title.trim()) {
-      onNotify('error', 'Company name and Job title are required.');
+      onNotify('error', 'Company name and job title are required');
       return;
     }
 
     setSaving(true);
 
     try {
-      // Save new screenshots to IndexedDB
       const screenshotIds: string[] = [];
       for (const item of screenshots) {
         if (item.isNew) {
@@ -203,7 +199,6 @@ export const JobModal: React.FC<JobModalProps> = ({
         screenshotIds.push(item.id);
       }
 
-      // Parse tags
       const tags = tagInput
         .split(',')
         .map((t) => t.trim())
@@ -235,68 +230,68 @@ export const JobModal: React.FC<JobModalProps> = ({
       onClose();
     } catch {
       setSaving(false);
-      onNotify('error', 'Failed to save job application.');
+      onNotify('error', 'Failed to save application');
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 my-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-[var(--surface)] text-[var(--ink)] rounded-2xl shadow-xl border border-[var(--line)] p-5 my-8">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[var(--line)]">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              {job ? 'Edit Application' : 'Add New Job'}
+            <h2 className="text-lg font-bold tracking-tight">
+              {job ? 'Edit job' : 'Add job'}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Keep full track of the role, requirements, follow-ups, and screenshots
+            <p className="text-xs text-[var(--muted)] mt-0.5">
+              Keep company details, dates, and screenshots organized
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          {/* Row 1: Company & Job Title */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+          {/* Row 1: Company & Title */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
-                Company Name *
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Company *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Stripe, Figma, Apple"
+                placeholder="e.g. Stripe"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
-                Job Title *
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Job title *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Senior Frontend Engineer"
+                placeholder="e.g. Software Engineer"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
           </div>
 
           {/* Row 2: Status, Workplace, Job Type */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
-                Pipeline Status
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Status
               </label>
               <select
                 value={status}
@@ -308,7 +303,7 @@ export const JobModal: React.FC<JobModalProps> = ({
                     setFollowupDate(addDays(7));
                   }
                 }}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-2.5 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-xs font-medium focus:outline-none focus:border-[var(--accent)] cursor-pointer"
               >
                 {STATUS_LIST.map((st) => (
                   <option key={st} value={st}>
@@ -319,13 +314,13 @@ export const JobModal: React.FC<JobModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
                 Workplace
               </label>
               <select
                 value={workplace}
                 onChange={(e) => setWorkplace(e.target.value as WorkplaceType)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-2.5 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-xs font-medium focus:outline-none focus:border-[var(--accent)] cursor-pointer"
               >
                 <option value="Remote">Remote</option>
                 <option value="Hybrid">Hybrid</option>
@@ -334,13 +329,13 @@ export const JobModal: React.FC<JobModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
-                Job Type
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Type
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as JobType)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-2.5 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-xs font-medium focus:outline-none focus:border-[var(--accent)] cursor-pointer"
               >
                 <option value="Full-time">Full-time</option>
                 <option value="Contract">Contract</option>
@@ -351,166 +346,124 @@ export const JobModal: React.FC<JobModalProps> = ({
           </div>
 
           {/* Row 3: Link & Location */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-                <LinkIcon className="w-3.5 h-3.5" /> Job Posting URL
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Job link
               </label>
               <input
                 type="url"
-                placeholder="https://..."
+                placeholder="https://"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" /> Location
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Location
               </label>
               <input
                 type="text"
-                placeholder="e.g. San Francisco, CA / London / Worldwide"
+                placeholder="e.g. San Francisco or Remote"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
           </div>
 
           {/* Row 4: Applied Date & Follow-up Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" /> Date Applied
+                <label className="block text-xs font-semibold text-[var(--muted)]">
+                  Date applied
                 </label>
                 <button
                   type="button"
                   onClick={() => setAppliedDate(todayStr())}
-                  className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                  className="text-[11px] font-medium text-[var(--accent)] hover:underline cursor-pointer"
                 >
-                  Set Today
+                  Set today
                 </button>
               </div>
               <input
                 type="date"
                 value={appliedDate}
                 onChange={(e) => setAppliedDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" /> Follow-up Date
+                <label className="block text-xs font-semibold text-[var(--muted)]">
+                  Follow-up date
                 </label>
-                <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <button type="button" onClick={() => setFollowupDate(addDays(3, appliedDate))} className="hover:underline">+3d</button>
-                  <span>•</span>
-                  <button type="button" onClick={() => setFollowupDate(addDays(7, appliedDate))} className="hover:underline">+1w</button>
-                  <span>•</span>
-                  <button type="button" onClick={() => setFollowupDate(addDays(14, appliedDate))} className="hover:underline">+2w</button>
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--accent)]">
+                  <button type="button" onClick={() => setFollowupDate(addDays(3, appliedDate))} className="hover:underline cursor-pointer">+3d</button>
+                  <span>·</span>
+                  <button type="button" onClick={() => setFollowupDate(addDays(7, appliedDate))} className="hover:underline cursor-pointer">+1w</button>
+                  <span>·</span>
+                  <button type="button" onClick={() => setFollowupDate(addDays(14, appliedDate))} className="hover:underline cursor-pointer">+2w</button>
                 </div>
               </div>
               <input
                 type="date"
                 value={followupDate}
                 onChange={(e) => setFollowupDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
           </div>
 
-          {/* Row 5: Salary & Resume Version */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Row 5: Salary & Contact */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5" /> Salary Range
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Salary range
               </label>
               <input
                 type="text"
-                placeholder="e.g. $160,000 - $190,000"
+                placeholder="e.g. $160k - $190k"
                 value={salary}
                 onChange={(e) => setSalary(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-                <FileText className="w-3.5 h-3.5" /> Resume Version Used
+              <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+                Contact / recruiter
               </label>
               <input
                 type="text"
-                placeholder="e.g. Resume_Frontend_v3.pdf"
-                value={resumeVersion}
-                onChange={(e) => setResumeVersion(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-          </div>
-
-          {/* Row 6: Recruiter / Contact info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-                <User className="w-3.5 h-3.5" /> Contact / Recruiter Name
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Jane Doe"
+                placeholder="Name or email"
                 value={contactName}
                 onChange={(e) => setContactName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)]"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-                <Mail className="w-3.5 h-3.5" /> Contact Email
-              </label>
-              <input
-                type="email"
-                placeholder="e.g. recruiter@company.com"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5" /> Tags & Tech Stack (comma separated)
-            </label>
-            <input
-              type="text"
-              placeholder="React, TypeScript, Next.js, GraphQL, FinTech"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
-              Notes & Interview Progress
+            <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+              Notes
             </label>
             <textarea
-              rows={3}
-              placeholder="Notes on company culture, interview rounds, questions asked, referrals..."
+              rows={2}
+              placeholder="Notes, interview questions, feedback..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-sm focus:outline-none focus:border-[var(--accent)] leading-relaxed"
             />
           </div>
 
           {/* Screenshot Dropzone */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1">
-              <ImageIcon className="w-3.5 h-3.5" /> Posting Screenshots & Offers
+            <label className="block text-xs font-semibold text-[var(--muted)] mb-1">
+              Screenshots
             </label>
             <div
               onDragOver={(e) => {
@@ -520,10 +473,10 @@ export const JobModal: React.FC<JobModalProps> = ({
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`p-4 rounded-xl border-2 border-dashed text-center cursor-pointer transition-colors ${
+              className={`p-3.5 rounded-lg border-2 border-dashed text-center cursor-pointer transition-colors ${
                 isDragging
-                  ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20'
-                  : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/20 hover:border-slate-400'
+                  ? 'border-[var(--accent)] bg-[var(--accent)]/5'
+                  : 'border-[var(--line)] bg-[var(--bg)] hover:border-[var(--muted)]'
               }`}
             >
               <input
@@ -534,23 +487,21 @@ export const JobModal: React.FC<JobModalProps> = ({
                 multiple
                 className="hidden"
               />
-              <Upload className="w-6 h-6 mx-auto text-slate-400 mb-1" />
-              <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                Click to browse files, drag images here, or paste with <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-mono">Ctrl+V</kbd>
+              <p className="text-xs font-medium text-[var(--ink)]">
+                Drop screenshots here, paste with <kbd className="px-1 py-0.5 rounded border border-[var(--line)] bg-[var(--surface)] text-[10px] font-mono">Ctrl+V</kbd>, or click to choose
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Images are compressed automatically and stored safely.</p>
             </div>
 
-            {/* Thumbnail preview row */}
+            {/* Thumbnails */}
             {screenshots.length > 0 && (
-              <div className="flex flex-wrap gap-2.5 mt-3">
+              <div className="flex flex-wrap gap-2 mt-2.5">
                 {screenshots.map((s, idx) => (
-                  <div key={s.id} className="relative group w-20 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100">
+                  <div key={s.id} className="relative group w-20 h-15 rounded-md overflow-hidden border border-[var(--line)] bg-[var(--bg)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={s.data}
                       alt={`Screenshot ${idx + 1}`}
-                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                      className="w-full h-full object-cover cursor-zoom-in"
                       onClick={() => onViewScreenshot(s.data)}
                     />
                     <button
@@ -559,10 +510,10 @@ export const JobModal: React.FC<JobModalProps> = ({
                         e.stopPropagation();
                         handleRemoveScreenshot(idx);
                       }}
-                      className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-black/90 text-white rounded-full transition-opacity opacity-80 hover:opacity-100"
-                      title="Remove image"
+                      className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/75 text-white flex items-center justify-center text-[10px] cursor-pointer hover:bg-black"
+                      title="Remove"
                     >
-                      <X className="w-3 h-3" />
+                      ×
                     </button>
                   </div>
                 ))}
@@ -570,8 +521,8 @@ export const JobModal: React.FC<JobModalProps> = ({
             )}
           </div>
 
-          {/* Modal Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          {/* Modal Footer */}
+          <div className="pt-3 border-t border-[var(--line)] flex items-center justify-between">
             {job && onDelete ? (
               <button
                 type="button"
@@ -581,26 +532,26 @@ export const JobModal: React.FC<JobModalProps> = ({
                     onClose();
                   }
                 }}
-                className="px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1.5 text-xs font-medium text-[var(--danger)] hover:bg-[var(--danger)]/10 rounded-lg transition-colors cursor-pointer"
               >
-                <Trash2 className="w-4 h-4" /> Delete Job
+                Delete job
               </button>
             ) : <div />}
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                className="px-3.5 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
+                className="px-4 py-1.5 text-xs font-semibold bg-[var(--accent)] hover:opacity-90 text-[var(--accent-ink)] rounded-lg transition-all cursor-pointer disabled:opacity-50"
               >
-                {saving ? 'Saving...' : job ? 'Update Job' : 'Add Job'}
+                {saving ? 'Saving...' : 'Save job'}
               </button>
             </div>
           </div>

@@ -13,7 +13,7 @@ import { DatabaseModal } from '@/components/DatabaseModal';
 import { ImportExportModal } from '@/components/ImportExportModal';
 import { ScreenshotLightbox } from '@/components/ScreenshotLightbox';
 import { Toast, ToastMessage } from '@/components/Toast';
-import { Plus, Briefcase, Sparkles, FilterX } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function Home() {
@@ -49,7 +49,7 @@ export default function Home() {
     setToasts((prev) => [...prev, { id, type, message }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3500);
+    }, 3200);
   }, []);
 
   const dismissToast = (id: string) => {
@@ -58,7 +58,6 @@ export default function Home() {
 
   // Initial Load & Theme
   useEffect(() => {
-    // Check dark mode
     const isDark =
       localStorage.getItem('theme') === 'dark' ||
       (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -69,10 +68,7 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
     }
 
-    // Set today string safely on client
     setTodayStr(new Date().toISOString().slice(0, 10));
-
-    // Load initial jobs
     loadAllData();
   }, []);
 
@@ -101,11 +97,10 @@ export default function Home() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
         searchInput?.focus();
       }
       if (e.key === 'n' && !isJobModalOpen && !isDatabaseModalOpen && !isImportExportModalOpen) {
-        // Only if not focused on an input
         const tag = (document.activeElement as HTMLElement)?.tagName;
         if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
           e.preventDefault();
@@ -134,13 +129,13 @@ export default function Home() {
 
     if (isNew) {
       setJobs((prev) => [job, ...prev]);
-      addToast('success', `Added ${job.company} application!`);
+      addToast('success', `Saved ${job.company}`);
       if (job.status === 'Offer') {
-        confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       }
     } else {
       setJobs((prev) => prev.map((j) => (j.id === job.id ? job : j)));
-      addToast('success', `Updated ${job.company} details.`);
+      addToast('success', `Updated ${job.company}`);
     }
 
     if (res.source === 'supabase') {
@@ -152,16 +147,15 @@ export default function Home() {
     const target = jobs.find((j) => j.id === id);
     await deleteJobFromStorage(id);
     setJobs((prev) => prev.filter((j) => j.id !== id));
-    addToast('info', `Removed ${target?.company || 'application'}.`);
+    addToast('info', `Deleted ${target?.company || 'job'}`);
   };
 
   const handleStatusChange = async (job: Job, newStatus: JobStatus) => {
     const updatedJob: Job = { ...job, status: newStatus };
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const curToday = new Date().toISOString().slice(0, 10);
 
-    // Auto set applied date if moving from Saved to Applied
     if (newStatus === 'Applied' && !updatedJob.applied_date) {
-      updatedJob.applied_date = todayStr;
+      updatedJob.applied_date = curToday;
       const fDate = new Date();
       fDate.setDate(fDate.getDate() + 7);
       updatedJob.followup_date = fDate.toISOString().slice(0, 10);
@@ -169,7 +163,7 @@ export default function Home() {
 
     await saveJobToStorage(updatedJob);
     setJobs((prev) => prev.map((j) => (j.id === job.id ? updatedJob : j)));
-    addToast('success', `Moved ${job.company} to ${newStatus}`);
+    addToast('success', `Status: ${newStatus}`);
   };
 
   // Filter & Sort Logic
@@ -178,7 +172,6 @@ export default function Home() {
 
     return jobs
       .filter((j) => {
-        // Search text matching
         if (q) {
           const matchCompany = j.company.toLowerCase().includes(q);
           const matchTitle = j.title.toLowerCase().includes(q);
@@ -192,19 +185,17 @@ export default function Home() {
           }
         }
 
-        // Status Filter
         if (selectedStatus !== 'All' && j.status !== selectedStatus) {
           return false;
         }
 
-        // Workplace Filter
         if (selectedWorkplace !== 'All' && j.workplace !== selectedWorkplace) {
           return false;
         }
 
-        // Due Filter
         if (onlyDue) {
           const isDue =
+            todayStr &&
             j.followup_date &&
             j.followup_date <= todayStr &&
             (j.status === 'Applied' || j.status === 'Interview');
@@ -228,11 +219,11 @@ export default function Home() {
         }
         return 0;
       });
-  }, [jobs, query, selectedStatus, selectedWorkplace, onlyDue, sortOption]);
+  }, [jobs, query, selectedStatus, selectedWorkplace, onlyDue, sortOption, todayStr]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors">
-      {/* Top Navigation */}
+    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--ink)] transition-colors">
+      {/* Navbar */}
       <Navbar
         source={source}
         darkMode={darkMode}
@@ -242,34 +233,25 @@ export default function Home() {
         onOpenImportExportModal={() => setIsImportExportModalOpen(true)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header Greeting */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      {/* Main Container */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+        {/* Editorial Subheader */}
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Application Pipeline
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Organize, track interview stages, save posting screenshots, and stay on top of follow-ups.
+            <h2 className="text-xl font-bold tracking-tight text-[var(--ink)]">
+              Applications
+            </h2>
+            <p className="text-xs text-[var(--muted)] mt-0.5">
+              Every application in one place, with posting screenshots and follow-up reminders.
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleOpenAddModal('Applied')}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-sm shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Application</span>
-              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] bg-emerald-700/60 rounded">N</kbd>
-            </button>
           </div>
         </div>
 
-        {/* Stats Metrics Counter Bar */}
+        {/* Stats strip */}
         <StatsBar
           jobs={jobs}
           todayStr={todayStr}
+          isDueFilterActive={onlyDue}
           onSelectDueFilter={() => {
             setOnlyDue((prev) => !prev);
             if (!onlyDue) {
@@ -278,7 +260,7 @@ export default function Home() {
           }}
         />
 
-        {/* Filter & View Switcher */}
+        {/* Filter bar */}
         <FilterBar
           jobs={jobs}
           query={query}
@@ -298,24 +280,20 @@ export default function Home() {
           onToggleOnlyDue={() => setOnlyDue((prev) => !prev)}
         />
 
-        {/* Content Body: Kanban Board vs Cards Grid */}
+        {/* Content View: Board vs Cards */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center p-20 text-center">
-            <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-sm font-medium text-slate-500">Loading your applications...</p>
+          <div className="flex flex-col items-center justify-center p-16 text-center">
+            <p className="text-xs text-[var(--muted)]">Loading applications...</p>
           </div>
         ) : filteredJobs.length === 0 ? (
-          <div className="p-12 text-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 my-6">
-            <div className="w-12 h-12 mx-auto rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
-              <FilterX className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-              No matching applications found
+          <div className="p-12 text-center rounded-xl border border-dashed border-[var(--line)] bg-[var(--surface)] my-4">
+            <h3 className="text-sm font-bold text-[var(--ink)]">
+              No matching applications
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
-              Try adjusting your search criteria, reset status filters, or log a new job application.
+            <p className="text-xs text-[var(--muted)] mt-1">
+              {jobs.length ? 'Try adjusting your search or filters.' : 'Log your first job to start tracking.'}
             </p>
-            <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="mt-3 flex items-center justify-center gap-2">
               {(query || selectedStatus !== 'All' || selectedWorkplace !== 'All' || onlyDue) && (
                 <button
                   onClick={() => {
@@ -324,16 +302,16 @@ export default function Home() {
                     setSelectedWorkplace('All');
                     setOnlyDue(false);
                   }}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
+                  className="px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] rounded-lg transition-colors border border-[var(--line)] cursor-pointer"
                 >
-                  Clear all filters
+                  Reset filters
                 </button>
               )}
               <button
                 onClick={() => handleOpenAddModal('Applied')}
-                className="px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg transition-colors"
+                className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--accent)] text-[var(--accent-ink)] hover:opacity-90 rounded-lg transition-opacity cursor-pointer"
               >
-                + Add First Job
+                + Add job
               </button>
             </div>
           </div>
@@ -347,7 +325,7 @@ export default function Home() {
             onQuickAdd={(st) => handleOpenAddModal(st)}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-8">
             {filteredJobs.map((job) => (
               <JobCard
                 key={job.id}
@@ -364,30 +342,28 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>
-            JobTracker.pro — Built for Vercel deployment with Supabase & offline-first storage.
-          </p>
-          <div className="flex items-center gap-4 text-xs font-semibold">
+      <footer className="mt-auto border-t border-[var(--line)] py-5 text-center text-xs text-[var(--muted)]">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>Data stays in this browser unless synced with Supabase.</span>
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setIsDatabaseModalOpen(true)}
-              className="text-emerald-600 dark:text-emerald-400 hover:underline"
+              className="hover:text-[var(--ink)] transition-colors cursor-pointer"
             >
-              Supabase Settings
+              Supabase setup
             </button>
-            <span>•</span>
+            <span>·</span>
             <button
               onClick={() => setIsImportExportModalOpen(true)}
-              className="text-slate-600 dark:text-slate-300 hover:underline"
+              className="hover:text-[var(--ink)] transition-colors cursor-pointer"
             >
-              Backup & Export
+              Export backup
             </button>
           </div>
         </div>
       </footer>
 
-      {/* Modals & Popups */}
+      {/* Modals */}
       <JobModal
         isOpen={isJobModalOpen}
         job={editingJob}
@@ -419,7 +395,6 @@ export default function Home() {
         onClose={() => setLightboxImage(null)}
       />
 
-      {/* Dynamic Toast Notifications */}
       <Toast toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
