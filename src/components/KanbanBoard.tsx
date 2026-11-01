@@ -54,7 +54,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-start pb-8">
+    <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin">
       {STATUS_LIST.map((status) => {
         const columnJobs = jobs.filter((j) => j.status === status);
 
@@ -63,7 +63,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             key={status}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
-            className="flex flex-col rounded-xl bg-[var(--surface-subtle)]/70 border border-[var(--line)] p-2.5 min-h-[460px] transition-colors"
+            className="w-[280px] min-w-[280px] shrink-0 flex flex-col rounded-xl bg-[var(--surface-subtle)]/60 border border-[var(--line)] p-2.5 min-h-[460px] transition-colors"
           >
             {/* Column Header */}
             <div className="flex items-center justify-between px-2 py-1.5 mb-2.5">
@@ -85,7 +85,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               </button>
             </div>
 
-            {/* Cards */}
+            {/* Column Cards */}
             <div className="flex flex-col gap-2.5 flex-1">
               {columnJobs.map((job) => (
                 <div

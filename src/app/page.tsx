@@ -29,7 +29,7 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<JobStatus | 'All'>('All');
   const [selectedWorkplace, setSelectedWorkplace] = useState<WorkplaceType | 'All'>('All');
-  const [viewMode, setViewMode] = useState<ViewMode>('board');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [onlyDue, setOnlyDue] = useState(false);
 

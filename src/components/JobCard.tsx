@@ -60,18 +60,33 @@ export const JobCard: React.FC<JobCardProps> = ({
     }
   };
 
+  const fmtDate = (str?: string) => {
+    if (!str) return '';
+    try {
+      const parts = str.split('-');
+      if (parts.length === 3) {
+        const [y, m, d] = parts;
+        const date = new Date(+y, +m - 1, +d);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      return str;
+    } catch {
+      return str;
+    }
+  };
+
   return (
     <div
       onClick={() => onEdit(job)}
-      className={`group relative p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] border-l-5 ${getBorderLeftColor(
+      className={`group relative p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] border-l-[5px] ${getBorderLeftColor(
         job.status
       )} transition-all duration-150 hover:border-[var(--muted)]/60 cursor-pointer flex flex-col justify-between gap-2.5 shadow-2xs`}
     >
       <div>
         {/* Row 1: Company & Status Selector */}
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="font-bold text-[15px] text-[var(--ink)] leading-snug truncate">
+          <div className="min-w-0 flex-1 pr-1">
+            <h3 className="font-bold text-[15px] text-[var(--ink)] leading-snug break-words">
               {job.company}
             </h3>
             <p className="text-xs text-[var(--muted)] font-medium truncate mt-0.5">
@@ -100,7 +115,7 @@ export const JobCard: React.FC<JobCardProps> = ({
         {isDue && (
           <div className="mt-2 text-[11px] font-semibold text-[var(--danger)] flex items-center gap-1 bg-[var(--danger)]/8 px-2 py-0.5 rounded-md">
             <Clock className="w-3 h-3 shrink-0" />
-            <span>Follow-up is due</span>
+            <span>Follow up {job.followup_date ? fmtDate(job.followup_date) : ''} (due)</span>
           </div>
         )}
 
@@ -114,16 +129,16 @@ export const JobCard: React.FC<JobCardProps> = ({
 
       {/* Metadata strip */}
       <div className="pt-2 border-t border-[var(--line-subtle)] flex items-center justify-between text-[11px] text-[var(--muted)]">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
           {job.applied_date && (
             <span className="flex items-center gap-1" title="Date Applied">
               <Calendar className="w-3 h-3" />
-              <span>{job.applied_date}</span>
+              <span>{fmtDate(job.applied_date)}</span>
             </span>
           )}
 
           {job.location && (
-            <span className="flex items-center gap-1 truncate max-w-[120px]" title="Location">
+            <span className="flex items-center gap-1 truncate max-w-[110px]" title="Location">
               <MapPin className="w-3 h-3 shrink-0" />
               <span className="truncate">{job.location}</span>
             </span>
