@@ -384,3 +384,4 @@ export const CvVaultModal: React.FC<CvVaultModalProps> = ({
     </div>
   );
 };
+

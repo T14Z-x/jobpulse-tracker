@@ -1,26 +1,31 @@
-# Pipeline — Job Application Tracker & Live Discovery Hub
+# JobPulse — Live Job Discovery & Application Pipeline Tracker
 
-A minimalist, craft-grade Job Application Tracker & Live Job Discovery Platform built with **Next.js 16 (App Router)**, **TypeScript**, **Tailwind CSS 4**, and **Supabase**.
+**JobPulse** is an all-in-one job application tracker, PDF CV vault, smart URL clipper, and real-time job discovery platform for **Bangladesh (`LinkedIn BD` & `BDJobs`)** and **International Remote (`Remotive` & `Arbeitnow`)** roles.
+
+Created by **[Gazi Asif Imtiaz](https://t14z.vercel.app)**.
 
 ---
 
 ## Key Features
 
-- **Live Job Discovery Feed (`Discover Jobs` Tab)**:
-  - **Bangladesh Market (`LinkedIn BD` + `BDJobs`)**: Real-time server-side aggregation from LinkedIn's Bangladesh guest search and BDJobs listings.
-  - **International Remote (`Remotive` + `Arbeitnow`)**: Zero-key public API aggregation for worldwide remote tech, product, design, and marketing openings.
-  - **1-Click Save & Apply**: Bookmark any discovered job to `Saved`, or click **Apply & Track** to launch the posting and automatically log it into your `Applied` pipeline with a 7-day follow-up reminder.
-- **Zero-Friction Application Logging**:
-  - **Inline 2-Field Quick Bar**: Type `Company` + `Role` (and optional URL) directly on the dashboard and press `Enter`.
-  - **Progressive Disclosure Modal**: Streamlined form with 1-click stage pills, smart company name inference from Greenhouse/Lever/Ashby links, `⌘V` screenshot pasting, and an expandable drawer for compensation, dates, location, and recruiter contact.
-- **Dual Pipeline Views**:
-  - **Grid View** and **Drag-and-Drop Kanban Board** (`Saved`, `Applied`, `Interview`, `Offer`, `Rejected`, `Ghosted`).
-- **Local-First + Optional Supabase Cloud Sync**:
-  - Works out-of-the-box in the browser (`localStorage` + `IndexedDB` for compressed posting screenshots) and syncs with **Supabase Postgres** across devices.
+- **🌍 Live Job Discovery Feed (`Discover Jobs` Tab)**:
+  - **Bangladesh Market (`LinkedIn BD` + `BDJobs`)**: Real-time server-side aggregation from LinkedIn's Bangladesh job search and BDJobs listings across all industries (*Marketing, Finance & Banking, Sales, HR, Customer Support, Operations, MTO, NGO, Design, Software*).
+  - **International Remote (`Remotive` + `Arbeitnow`)**: Zero-key public API aggregation for worldwide remote openings with salary ranges and company logos.
+  - **1-Click Apply & Track**: Launches the job posting, **copies a tailored cover note** (`Dear Hiring Team at {company}...`) to your clipboard, links your **Default CV**, and automatically logs the job into your `Applied` pipeline with a 7-day follow-up reminder.
+- **📄 CV Vault & Quick-Copy Candidate Profile**:
+  - Store multiple PDF CVs locally in `IndexedDB` with instant in-browser PDF preview, 1-click download, and Default CV selection.
+  - Save your reusable candidate profile (Name, Email, Phone, LinkedIn, Portfolio `https://t14z.vercel.app`, Expected Salary, and Cover Note template) with 1-click copy buttons.
+- **✨ Smart URL Clipper (`Auto-fill`)**:
+  - Paste any LinkedIn, BDJobs, Greenhouse, Lever, or career link into the modal and click **Auto-fill** to scrape the Company, Role, Location, Workplace, Salary, and Description via `JobPosting` JSON-LD schema and Jina Reader (`r.jina.ai`).
+- **📋 Zero-Friction Pipeline Management**:
+  - **2-Second Inline Quick Log Bar** on the main dashboard.
+  - **Grid View** & **Drag-and-Drop Kanban Board** (*Saved → Applied → Interview → Offer → Rejected → Ghosted*).
+  - **Posting Screenshot Vault**: Drag-and-drop or press `⌘V` / `Ctrl+V` to attach compressed posting screenshots.
+  - **Local-First + Supabase Cloud Sync**: Works offline immediately and syncs across devices with **Supabase Postgres**, plus 1-click **JSON Backup** and **CSV Export**.
 
 ---
 
-## Local Development
+## Quick Start (Local Development)
 
 ```bash
 npm install
@@ -35,19 +40,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 1. Create a free project at [supabase.com/dashboard](https://supabase.com/dashboard).
 2. Open **SQL Editor** → **New Query**, paste the contents of [`supabase-schema.sql`](./supabase-schema.sql), and click **Run**.
-3. Copy your **Project URL** and **Anon Public Key** from **Project Settings → API**.
-4. Either paste them in the in-app **Local / Cloud** modal, or set them in `.env.local` (see [`.env.example`](./.env.example)):
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
-```
+3. Copy your **Project URL** and **Anon Public Key** from **Project Settings → API** and paste them in the in-app **Cloud / Local** modal or in `.env.local` (see [`.env.example`](./.env.example)).
 
 ---
 
-## Deploying to Vercel
+## Author
 
-1. Push this repository to GitHub.
-2. Import the repository at [vercel.com/new](https://vercel.com/new).
-3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` under **Environment Variables** (optional if using in-app setup or local mode).
-4. Click **Deploy**.
+**Gazi Asif Imtiaz**  
+Portfolio: [https://t14z.vercel.app](https://t14z.vercel.app)  
+GitHub: [@T14Z-x](https://github.com/T14Z-x)

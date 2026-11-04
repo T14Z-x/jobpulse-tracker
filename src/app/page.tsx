@@ -434,8 +434,29 @@ export default function Home() {
       {/* Minimal Footer */}
       <footer className="mt-auto border-t border-[var(--line-subtle)] py-4 text-xs text-[var(--muted)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
-          <span>Local-first storage · Press N for new job, ⌘K to search</span>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-[var(--ink)]">JobPulse</span>
+            <span>·</span>
+            <span>
+              Created by{' '}
+              <a
+                href="https://t14z.vercel.app"
+                target="_blank"
+                rel="author noreferrer"
+                className="font-medium text-[var(--ink)] hover:underline underline-offset-2"
+              >
+                Gazi Asif Imtiaz
+              </a>
+            </span>
+          </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsCvVaultModalOpen(true)}
+              className="hover:text-[var(--ink)] transition-colors cursor-pointer"
+            >
+              CV Vault
+            </button>
+            <span>·</span>
             <button
               onClick={() => setIsDatabaseModalOpen(true)}
               className="hover:text-[var(--ink)] transition-colors cursor-pointer"

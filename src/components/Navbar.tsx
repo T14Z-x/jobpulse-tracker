@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, Database, Download, Sun, Moon, Briefcase, Compass, FileText } from 'lucide-react';
+import { Plus, Database, Download, Sun, Moon, Activity, Compass, FileText } from 'lucide-react';
 
 export type WorkspaceTab = 'pipeline' | 'discover';
 
@@ -37,10 +37,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-[var(--ink)] text-[var(--bg)] flex items-center justify-center">
-              <Briefcase className="w-3.5 h-3.5 stroke-[2.2]" />
+              <Activity className="w-3.5 h-3.5 stroke-[2.4]" />
             </div>
             <span className="text-[14px] font-semibold text-[var(--ink)] tracking-tight hidden sm:inline">
-              Pipeline
+              JobPulse
             </span>
           </div>
 

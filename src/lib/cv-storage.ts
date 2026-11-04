@@ -29,7 +29,7 @@ const CV_STORE_NAME = 'pdf_files';
 
 const DEFAULT_COVER_TEMPLATE = `Dear Hiring Team at {company},
 
-I am writing to express my strong interest in the {role} position. Please find my CV attached for your review. I would welcome the opportunity to discuss how my background and experience align with your team's goals.
+I am writing to express my strong interest in the {role} position. Please find my CV attached for your review, and you can also view my portfolio at {portfolio}. I would welcome the opportunity to discuss how my background and experience align with your team's goals.
 
 Best regards,
 {name}`;
@@ -163,11 +163,11 @@ export function getCandidateProfile(): CandidateProfile {
     const raw = localStorage.getItem(PROFILE_KEY);
     if (!raw) {
       return {
-        fullName: '',
+        fullName: 'Gazi Asif Imtiaz',
         email: '',
         phone: '',
         linkedinUrl: '',
-        portfolioUrl: '',
+        portfolioUrl: 'https://t14z.vercel.app',
         expectedSalary: '',
         noticePeriod: '',
         coverNoteTemplate: DEFAULT_COVER_TEMPLATE,
@@ -215,3 +215,4 @@ export function generateTailoredCoverNote(company: string, role: string): string
     .replace(/\{linkedin\}/gi, profile.linkedinUrl || '')
     .replace(/\{portfolio\}/gi, profile.portfolioUrl || '');
 }
+

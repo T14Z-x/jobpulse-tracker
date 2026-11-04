@@ -208,3 +208,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not extract job details from URL' }, { status: 500 });
   }
 }
+
