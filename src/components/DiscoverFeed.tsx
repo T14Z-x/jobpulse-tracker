@@ -21,15 +21,19 @@ interface DiscoverFeedProps {
   onNotify: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const ROLE_PRESETS = [
-  'Software Engineer',
-  'Frontend',
-  'Full Stack',
-  'UI/UX Designer',
-  'Product Manager',
-  'Data & AI',
-  'Mobile / Flutter',
-  'Marketing',
+const CATEGORY_PRESETS: { label: string; query: string }[] = [
+  { label: 'All Jobs', query: '' },
+  { label: 'Marketing & Digital', query: 'Marketing' },
+  { label: 'Finance & Banking', query: 'Finance' },
+  { label: 'Sales & Business Dev', query: 'Business Development' },
+  { label: 'HR & Admin', query: 'Human Resources' },
+  { label: 'Customer Support', query: 'Customer Support' },
+  { label: 'Operations & Supply Chain', query: 'Operations' },
+  { label: 'Management Trainee (MTO)', query: 'Management Trainee' },
+  { label: 'NGO & Development', query: 'Project Officer' },
+  { label: 'Content & Copywriting', query: 'Content Writer' },
+  { label: 'Design & Creative', query: 'Designer' },
+  { label: 'Software & IT', query: 'Software Engineer' },
 ];
 
 type MarketFilter = 'all' | 'bangladesh' | 'remote';
@@ -40,28 +44,31 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
   onSaveToPipeline,
   onNotify,
 }) => {
-  const [searchInput, setSearchInput] = useState('Software Engineer');
-  const [activeQuery, setActiveQuery] = useState('Software Engineer');
+  const [searchInput, setSearchInput] = useState('');
+  const [activeQuery, setActiveQuery] = useState('');
   const [market, setMarket] = useState<MarketFilter>('all');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('All');
   const [discovered, setDiscovered] = useState<DiscoveredJob[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFeed = useCallback(async (q: string, m: MarketFilter) => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/jobs/discover?q=${encodeURIComponent(q)}&market=${encodeURIComponent(m)}`
-      );
-      if (!res.ok) throw new Error('Failed to load jobs');
-      const data = await res.json();
-      setDiscovered(Array.isArray(data.jobs) ? data.jobs : []);
-    } catch {
-      onNotify('error', 'Could not reach live job feeds');
-    } finally {
-      setLoading(false);
-    }
-  }, [onNotify]);
+  const fetchFeed = useCallback(
+    async (q: string, m: MarketFilter) => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/jobs/discover?q=${encodeURIComponent(q)}&market=${encodeURIComponent(m)}`
+        );
+        if (!res.ok) throw new Error('Failed to load jobs');
+        const data = await res.json();
+        setDiscovered(Array.isArray(data.jobs) ? data.jobs : []);
+      } catch {
+        onNotify('error', 'Could not reach live job feeds');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onNotify]
+  );
 
   useEffect(() => {
     fetchFeed(activeQuery, market);
@@ -72,9 +79,9 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
     setActiveQuery(searchInput.trim());
   };
 
-  const handlePresetClick = (role: string) => {
-    setSearchInput(role);
-    setActiveQuery(role);
+  const handlePresetClick = (q: string) => {
+    setSearchInput(q);
+    setActiveQuery(q);
   };
 
   const findPipelineMatch = (d: DiscoveredJob): Job | undefined => {
@@ -104,7 +111,9 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
       salary: d.salary,
       applied_date: status === 'Applied' ? today : undefined,
       followup_date: status === 'Applied' ? followup : undefined,
-      notes: `Discovered via ${d.source} (${d.market === 'bangladesh' ? 'Bangladesh Market' : 'International Remote'})`,
+      notes: `Discovered via ${d.source} (${
+        d.market === 'bangladesh' ? 'Bangladesh Market' : 'International Remote'
+      })`,
       tags: d.tags,
       created_at: Date.now(),
     };
@@ -242,7 +251,7 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)] pointer-events-none" />
             <input
               type="search"
-              placeholder="Search role, tech stack, or keyword (e.g. React, Python, Designer, SQA)..."
+              placeholder="Search any job or industry (e.g. Bank, Marketing, HR, Accountant, MTO, Sales, Designer, Engineer)..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-8.5 pr-4 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted)] text-[13px] focus:outline-none focus:border-[var(--ink)] transition-colors"
@@ -257,23 +266,23 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
           </button>
         </form>
 
-        {/* Quick Role Presets */}
+        {/* Cross-Industry Presets */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
-          <span className="text-[11px] text-[var(--muted-subtle)] mr-1 shrink-0">Popular:</span>
-          {ROLE_PRESETS.map((role) => {
-            const isSelected = activeQuery.toLowerCase() === role.toLowerCase();
+          <span className="text-[11px] text-[var(--muted-subtle)] mr-1 shrink-0">Categories:</span>
+          {CATEGORY_PRESETS.map((cat) => {
+            const isSelected = activeQuery.toLowerCase() === cat.query.toLowerCase();
             return (
               <button
-                key={role}
+                key={cat.label}
                 type="button"
-                onClick={() => handlePresetClick(role)}
+                onClick={() => handlePresetClick(cat.query)}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-[var(--surface-subtle)] text-[var(--ink)] border border-[var(--line)]'
                     : 'text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)]'
                 }`}
               >
-                {role}
+                {cat.label}
               </button>
             );
           })}
@@ -311,7 +320,7 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
           <span>Open portal search:</span>
           <a
             href={`https://jobs.bdjobs.com/jobsearch.asp?txtsearch=${encodeURIComponent(
-              activeQuery || 'Software'
+              activeQuery || 'Executive'
             )}`}
             target="_blank"
             rel="noreferrer"
@@ -322,7 +331,7 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
           <span>·</span>
           <a
             href={`https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(
-              activeQuery || 'Software Engineer'
+              activeQuery
             )}&location=Bangladesh`}
             target="_blank"
             rel="noreferrer"
@@ -356,10 +365,10 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
         <div className="py-16 px-4 text-center rounded-xl border border-dashed border-[var(--line)] bg-[var(--surface)]/50">
           <Building2 className="w-6 h-6 text-[var(--muted-subtle)] mx-auto mb-2" />
           <h3 className="text-[13px] font-semibold text-[var(--ink)]">
-            No live jobs matched &ldquo;{activeQuery}&rdquo;
+            No live jobs matched &ldquo;{activeQuery || 'All'}&rdquo;
           </h3>
           <p className="text-[12px] text-[var(--muted)] mt-1 max-w-sm mx-auto">
-            Try a broader keyword (like &ldquo;Engineer&rdquo;, &ldquo;React&rdquo;, or &ldquo;Design&rdquo;) or switch the source filter to All.
+            Try another category chip above (Marketing, Finance, HR, Sales, Operations, MTO) or switch the source filter to All.
           </p>
         </div>
       ) : (
@@ -462,4 +471,3 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
     </div>
   );
 };
-

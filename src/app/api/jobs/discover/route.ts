@@ -39,10 +39,10 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
 }
 
 /**
- * 1. LinkedIn Guest Search Parser for Bangladesh Market
+ * 1. LinkedIn Guest Search Parser for Bangladesh Market (All Industries)
  */
 async function fetchLinkedInBangladesh(query: string): Promise<DiscoveredJob[]> {
-  const q = query.trim() || 'Software Engineer';
+  const q = query.trim();
   const url = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(
     q
   )}&location=${encodeURIComponent('Bangladesh')}&start=0`;
@@ -65,7 +65,8 @@ async function fetchLinkedInBangladesh(query: string): Promise<DiscoveredJob[]> 
 
     for (const block of blocks) {
       const titleMatch = block.match(/class="base-search-card__title[^"]*"[^>]*>([\s\S]*?)<\/h3>/i);
-      const companyMatch = block.match(/class="base-search-card__subtitle[^"]*"[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>/i) ||
+      const companyMatch =
+        block.match(/class="base-search-card__subtitle[^"]*"[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>/i) ||
         block.match(/class="base-search-card__subtitle[^"]*"[^>]*>([\s\S]*?)<\/h4>/i);
       const locMatch = block.match(/class="job-search-card__location[^"]*"[^>]*>([\s\S]*?)<\/span>/i);
       const linkMatch = block.match(/href="(https:\/\/[a-z.]*linkedin\.com\/jobs\/view\/[^"?]+)/i);
@@ -101,17 +102,17 @@ async function fetchLinkedInBangladesh(query: string): Promise<DiscoveredJob[]> 
       });
     }
 
-    return results.slice(0, 20);
+    return results.slice(0, 24);
   } catch {
     return [];
   }
 }
 
 /**
- * 2. BDJobs Live Search Parser for Bangladesh Market
+ * 2. BDJobs Live Search Parser for Bangladesh Market (All Industries)
  */
 async function fetchBDJobs(query: string): Promise<DiscoveredJob[]> {
-  const q = query.trim() || 'Software';
+  const q = query.trim() || 'Executive';
   const searchUrl = `https://jobs.bdjobs.com/jobsearch.asp?txtsearch=${encodeURIComponent(q)}`;
 
   try {
@@ -128,17 +129,15 @@ async function fetchBDJobs(query: string): Promise<DiscoveredJob[]> {
     const html = await res.text();
     const results: DiscoveredJob[] = [];
 
-    // Match job detail links on BDJobs search page
     const linkRegex = /<a[^>]+href="([^"]*jobdetails\.asp\?id=(\d+)[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
     let match: RegExpExecArray | null;
 
-    while ((match = linkRegex.exec(html)) !== null && results.length < 15) {
+    while ((match = linkRegex.exec(html)) !== null && results.length < 18) {
       const rawHref = match[1];
       const jobId = match[2];
       const rawTitle = decodeHtml(match[3].replace(/<[^>]+>/g, ''));
       if (!rawTitle || rawTitle.length < 3) continue;
 
-      // Look around the match for company name & location
       const snippet = html.slice(Math.max(0, match.index - 600), Math.min(html.length, match.index + 1200));
       const compMatch =
         snippet.match(/class="comp-name-text[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
@@ -177,7 +176,7 @@ async function fetchBDJobs(query: string): Promise<DiscoveredJob[]> {
 }
 
 /**
- * 3. Remotive Public API for International Remote Jobs
+ * 3. Remotive Public API for International Remote Jobs (Marketing, Sales, Support, Finance, HR, Design, Tech)
  */
 async function fetchRemotiveJobs(query: string): Promise<DiscoveredJob[]> {
   const q = query.trim();
@@ -215,7 +214,7 @@ async function fetchRemotiveJobs(query: string): Promise<DiscoveredJob[]> {
 }
 
 /**
- * 4. Arbeitnow Public API for International & Remote Tech Jobs
+ * 4. Arbeitnow Public API for International & Remote Jobs (All Fields)
  */
 async function fetchArbeitnowJobs(query: string): Promise<DiscoveredJob[]> {
   try {
@@ -235,15 +234,16 @@ async function fetchArbeitnowJobs(query: string): Promise<DiscoveredJob[]> {
 
     return filtered.slice(0, 18).map((item: Record<string, unknown>) => {
       const isRemote = Boolean(item.remote);
-      const created = typeof item.created_at === 'number'
-        ? new Date(item.created_at * 1000).toISOString().slice(0, 10)
-        : 'Recent';
+      const created =
+        typeof item.created_at === 'number'
+          ? new Date(item.created_at * 1000).toISOString().slice(0, 10)
+          : 'Recent';
       return {
         id: `arb_${item.slug || Math.random().toString(36).slice(2, 8)}`,
         source: 'Arbeitnow',
         market: 'remote',
-        company: String(item.company_name || 'Global Tech'),
-        title: String(item.title || 'Software Role'),
+        company: String(item.company_name || 'Global Employer'),
+        title: String(item.title || 'Open Role'),
         location: isRemote ? 'Remote (Global)' : String(item.location || 'International'),
         workplace: isRemote ? 'Remote' : 'Hybrid',
         url: String(item.url || 'https://www.arbeitnow.com'),
@@ -259,7 +259,7 @@ async function fetchArbeitnowJobs(query: string): Promise<DiscoveredJob[]> {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get('q') || '';
-  const market = searchParams.get('market') || 'all'; // 'all' | 'bangladesh' | 'remote'
+  const market = searchParams.get('market') || 'all';
 
   const tasks: Promise<DiscoveredJob[]>[] = [];
 
@@ -287,4 +287,3 @@ export async function GET(req: NextRequest) {
     fetchedAt: new Date().toISOString(),
   });
 }
-
