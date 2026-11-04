@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, Database, Download, Sun, Moon, Briefcase, Compass } from 'lucide-react';
+import { Plus, Database, Download, Sun, Moon, Briefcase, Compass, FileText } from 'lucide-react';
 
 export type WorkspaceTab = 'pipeline' | 'discover';
 
@@ -13,6 +13,7 @@ interface NavbarProps {
   darkMode: boolean;
   onToggleTheme: () => void;
   onOpenAddModal: () => void;
+  onOpenCvVaultModal: () => void;
   onOpenDatabaseModal: () => void;
   onOpenImportExportModal: () => void;
 }
@@ -25,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   darkMode,
   onToggleTheme,
   onOpenAddModal,
+  onOpenCvVaultModal,
   onOpenDatabaseModal,
   onOpenImportExportModal,
 }) => {
@@ -76,6 +78,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-1.5">
+          {/* CV Vault & Quick-Copy Profile */}
+          <button
+            onClick={onOpenCvVaultModal}
+            className="px-2.5 py-1.5 rounded-lg border border-[var(--line)] hover:border-[var(--muted-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--ink)] text-[12px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="CV Vault & Candidate Quick-Copy Profile"
+          >
+            <FileText className="w-3.5 h-3.5 text-[var(--muted)]" />
+            <span>CV Vault</span>
+          </button>
+
           <button
             onClick={onOpenDatabaseModal}
             className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] text-[12px] font-medium transition-colors cursor-pointer"
@@ -96,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Backup & Export"
           >
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden lg:inline">Export</span>
           </button>
 
           <button
@@ -108,15 +120,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
 
-          <div className="w-px h-4 bg-[var(--line)] mx-1 hidden sm:block" />
+          <div className="w-px h-4 bg-[var(--line)] mx-0.5 hidden sm:block" />
 
           <button
             onClick={onOpenAddModal}
             className="px-3 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-[0.99] text-[var(--accent-ink)] font-medium text-[12px] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.2]" />
-            <span>New job</span>
-            <kbd className="hidden sm:inline-block ml-1 px-1 py-0.2 text-[10px] font-mono opacity-60 border border-current/25 rounded">
+            <span className="hidden sm:inline">New job</span>
+            <kbd className="hidden md:inline-block ml-1 px-1 py-0.2 text-[10px] font-mono opacity-60 border border-current/25 rounded">
               N
             </kbd>
           </button>

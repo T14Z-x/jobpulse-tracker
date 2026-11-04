@@ -12,7 +12,10 @@ import {
   Image as ImageIcon,
   Sparkles,
   Trash2,
+  Copy,
+  RefreshCw,
 } from 'lucide-react';
+import { generateTailoredCoverNote, getStoredResumes } from '@/lib/cv-storage';
 
 interface JobModalProps {
   isOpen: boolean;
@@ -102,6 +105,7 @@ export const JobModal: React.FC<JobModalProps> = ({
 
   const [isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [clipping, setClipping] = useState(false);
 
   const todayStr = () => new Date().toISOString().slice(0, 10);
   const addDays = (days: number, fromDate?: string) => {
@@ -234,6 +238,40 @@ export const JobModal: React.FC<JobModalProps> = ({
       const guessed = inferCompanyFromUrl(val);
       if (guessed) setCompany(guessed);
     }
+  };
+
+  const handleAutoFillFromUrl = async () => {
+    if (!link.trim().startsWith('http')) {
+      onNotify('error', 'Paste a valid job URL first');
+      return;
+    }
+    setClipping(true);
+    try {
+      const res = await fetch('/api/clip-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: link.trim() }),
+      });
+      if (!res.ok) throw new Error('Clip failed');
+      const data = await res.json();
+      if (data.company && !company.trim()) setCompany(data.company);
+      if (data.title && !title.trim()) setTitle(data.title);
+      if (data.location && !location.trim()) setLocation(data.location);
+      if (data.workplace) setWorkplace(data.workplace);
+      if (data.salary && !salary.trim()) setSalary(data.salary);
+      if (data.notes && !notes.trim()) setNotes(data.notes);
+      onNotify('success', 'Auto-filled details from job URL');
+    } catch {
+      onNotify('error', 'Could not scrape details from that URL');
+    } finally {
+      setClipping(false);
+    }
+  };
+
+  const handleCopyCoverNote = () => {
+    const text = generateTailoredCoverNote(company, title);
+    navigator.clipboard.writeText(text);
+    onNotify('success', 'Tailored cover note copied');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -375,20 +413,51 @@ export const JobModal: React.FC<JobModalProps> = ({
             </div>
           </div>
 
-          {/* Job Link (single clean line with smart company detection) */}
-          <div className="relative">
-            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)] pointer-events-none" />
-            <input
-              type="url"
-              placeholder="Paste job posting URL (optional)"
-              value={link}
-              onChange={(e) => handleLinkChange(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[13px] focus:outline-none focus:border-[var(--ink)] transition-colors"
-            />
+          {/* Job Link (single clean line with smart company detection + 1-click URL scraper) */}
+          <div className="flex gap-1.5">
+            <div className="relative flex-1">
+              <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)] pointer-events-none" />
+              <input
+                type="url"
+                placeholder="Paste LinkedIn / BDJobs / Career URL to auto-fill..."
+                value={link}
+                onChange={(e) => handleLinkChange(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[13px] focus:outline-none focus:border-[var(--ink)] transition-colors"
+              />
+            </div>
+            {link.trim().startsWith('http') && (
+              <button
+                type="button"
+                disabled={clipping}
+                onClick={handleAutoFillFromUrl}
+                className="px-2.5 py-2 rounded-lg border border-[var(--line)] bg-[var(--surface-subtle)] hover:bg-[var(--surface-hover)] text-[11px] font-semibold text-[var(--ink)] flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                title="Scrape company, role, location & description from URL"
+              >
+                {clipping ? (
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3 h-3" />
+                )}
+                <span>{clipping ? 'Reading...' : 'Auto-fill'}</span>
+              </button>
+            )}
           </div>
 
           {/* Notes + Screenshot Dropzone side-by-side or stacked cleanly */}
           <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium text-[var(--muted)]">Notes</span>
+              {(company.trim() || title.trim()) && (
+                <button
+                  type="button"
+                  onClick={handleCopyCoverNote}
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--ink-secondary)] hover:text-[var(--ink)] hover:underline cursor-pointer"
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>Copy tailored cover note</span>
+                </button>
+              )}
+            </div>
             <textarea
               rows={2}
               placeholder="Quick notes, referral, or key requirements (optional)..."

@@ -10,6 +10,7 @@ import { KanbanBoard } from '@/components/KanbanBoard';
 import { JobCard } from '@/components/JobCard';
 import { DiscoverFeed } from '@/components/DiscoverFeed';
 import { JobModal } from '@/components/JobModal';
+import { CvVaultModal } from '@/components/CvVaultModal';
 import { DatabaseModal } from '@/components/DatabaseModal';
 import { ImportExportModal } from '@/components/ImportExportModal';
 import { ScreenshotLightbox } from '@/components/ScreenshotLightbox';
@@ -44,6 +45,7 @@ export default function Home() {
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [modalInitialStatus, setModalInitialStatus] = useState<JobStatus>('Applied');
+  const [isCvVaultModalOpen, setIsCvVaultModalOpen] = useState(false);
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -266,6 +268,7 @@ export default function Home() {
         darkMode={darkMode}
         onToggleTheme={toggleTheme}
         onOpenAddModal={() => handleOpenAddModal('Applied')}
+        onOpenCvVaultModal={() => setIsCvVaultModalOpen(true)}
         onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
         onOpenImportExportModal={() => setIsImportExportModalOpen(true)}
       />
@@ -459,6 +462,12 @@ export default function Home() {
         onSave={handleSaveJob}
         onDelete={handleDeleteJob}
         onViewScreenshot={(url) => setLightboxImage(url)}
+        onNotify={addToast}
+      />
+
+      <CvVaultModal
+        isOpen={isCvVaultModalOpen}
+        onClose={() => setIsCvVaultModalOpen(false)}
         onNotify={addToast}
       />
 

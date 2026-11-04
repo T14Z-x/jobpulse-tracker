@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Job } from '@/types/job';
 import type { DiscoveredJob } from '@/app/api/jobs/discover/route';
+import { generateTailoredCoverNote, getStoredResumes } from '@/lib/cv-storage';
 import {
   Search,
   Globe,
@@ -131,9 +132,18 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
 
   const handleApplyAndTrack = (d: DiscoveredJob) => {
     window.open(d.url, '_blank', 'noopener,noreferrer');
+    try {
+      const note = generateTailoredCoverNote(d.company, d.title);
+      navigator.clipboard.writeText(note);
+    } catch {
+      // clipboard permission optional
+    }
+
+    const defaultCv = getStoredResumes().find((r) => r.isDefault);
     const existing = findPipelineMatch(d);
     if (!existing) {
       const newJob = convertToPipelineJob(d, 'Applied');
+      if (defaultCv) newJob.resume_version = defaultCv.label;
       onSaveToPipeline(newJob);
     } else if (existing.status === 'Saved') {
       const today = new Date().toISOString().slice(0, 10);
@@ -144,6 +154,7 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
         status: 'Applied',
         applied_date: today,
         followup_date: fDate.toISOString().slice(0, 10),
+        resume_version: defaultCv?.label || existing.resume_version,
       });
     }
   };
