@@ -3,7 +3,8 @@
 import React from 'react';
 import { Job, JobStatus } from '@/types/job';
 import { STATUS_LIST } from './FilterBar';
-import { ExternalLink, Calendar, MapPin, Image as ImageIcon, Clock, Trash2, Edit2 } from 'lucide-react';
+import { getScreenshot } from '@/lib/idb';
+import { ExternalLink, Image as ImageIcon, Clock, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface JobCardProps {
@@ -15,18 +16,28 @@ interface JobCardProps {
   onOpenScreenshot?: (imageUrl: string) => void;
 }
 
+const STATUS_DOT: Record<JobStatus, string> = {
+  Saved: 'bg-[var(--s-saved-dot)]',
+  Applied: 'bg-[var(--s-applied-dot)]',
+  Interview: 'bg-[var(--s-interview-dot)]',
+  Offer: 'bg-[var(--s-offer-dot)]',
+  Rejected: 'bg-[var(--s-rejected-dot)]',
+  Ghosted: 'bg-[var(--s-ghosted-dot)]',
+};
+
 export const JobCard: React.FC<JobCardProps> = ({
   job,
   todayStr = '',
   onEdit,
   onDelete,
   onStatusChange,
+  onOpenScreenshot,
 }) => {
   const isDue = Boolean(
     todayStr &&
-    job.followup_date &&
-    job.followup_date <= todayStr &&
-    (job.status === 'Applied' || job.status === 'Interview')
+      job.followup_date &&
+      job.followup_date <= todayStr &&
+      (job.status === 'Applied' || job.status === 'Interview')
   );
 
   const handleStatusSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -38,25 +49,27 @@ export const JobCard: React.FC<JobCardProps> = ({
     onStatusChange(job, nextStatus);
   };
 
-  const getBorderLeftColor = (status: JobStatus) => {
-    switch (status) {
-      case 'Saved': return 'border-l-[#a5b2ae] dark:border-l-[#3a4e47]';
-      case 'Applied': return 'border-l-[#5d9fd6] dark:border-l-[#2a557b]';
-      case 'Interview': return 'border-l-[#3bb36a] dark:border-l-[#20633b]';
-      case 'Offer': return 'border-l-[#dba400] dark:border-l-[#6e550e]';
-      case 'Rejected': return 'border-l-[#d4624b] dark:border-l-[#682e22]';
-      case 'Ghosted': return 'border-l-[#887da1] dark:border-l-[#493f5d]';
-    }
+  const handlePreviewScreenshot = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onOpenScreenshot || !job.screenshots?.length) return;
+    const first = await getScreenshot(job.screenshots[0]);
+    if (first) onOpenScreenshot(first);
   };
 
   const getStatusClass = (status: JobStatus) => {
     switch (status) {
-      case 'Saved': return 'status-saved';
-      case 'Applied': return 'status-applied';
-      case 'Interview': return 'status-interview';
-      case 'Offer': return 'status-offer';
-      case 'Rejected': return 'status-rejected';
-      case 'Ghosted': return 'status-ghosted';
+      case 'Saved':
+        return 'status-saved';
+      case 'Applied':
+        return 'status-applied';
+      case 'Interview':
+        return 'status-interview';
+      case 'Offer':
+        return 'status-offer';
+      case 'Rejected':
+        return 'status-rejected';
+      case 'Ghosted':
+        return 'status-ghosted';
     }
   };
 
@@ -75,111 +88,131 @@ export const JobCard: React.FC<JobCardProps> = ({
     }
   };
 
+  const initial = (job.company || '?').trim().charAt(0).toUpperCase();
+
   return (
     <div
       onClick={() => onEdit(job)}
-      className={`group relative p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] border-l-[5px] ${getBorderLeftColor(
-        job.status
-      )} transition-all duration-150 hover:border-[var(--muted)]/60 cursor-pointer flex flex-col justify-between gap-2.5 shadow-2xs`}
+      className="group relative p-4 rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--muted-subtle)] transition-all duration-150 cursor-pointer flex flex-col justify-between gap-3"
     >
       <div>
-        {/* Row 1: Company & Status Selector */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1 pr-1">
-            <h3 className="font-bold text-[15px] text-[var(--ink)] leading-snug break-words">
-              {job.company}
-            </h3>
-            <p className="text-xs text-[var(--muted)] font-medium truncate mt-0.5">
-              {job.title}
-            </p>
+        {/* Top Row: Avatar + Company/Role + Stage Selector */}
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-[var(--surface-subtle)] border border-[var(--line-subtle)] text-[var(--ink-secondary)] font-semibold text-[13px] flex items-center justify-center shrink-0 select-none">
+              {initial}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-semibold text-[14px] text-[var(--ink)] leading-snug truncate">
+                  {job.company}
+                </h3>
+                {job.link && (
+                  <a
+                    href={job.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[var(--muted-subtle)] hover:text-[var(--ink)] transition-colors shrink-0"
+                    title="Open job posting"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              <p className="text-[12px] text-[var(--muted)] truncate mt-0.5">
+                {job.title}
+              </p>
+            </div>
           </div>
 
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-            <select
-              value={job.status}
-              onChange={handleStatusSelect}
-              className={`status-badge ${getStatusClass(
-                job.status
-              )} focus:outline-none cursor-pointer appearance-none text-center`}
-            >
-              {STATUS_LIST.map((st) => (
-                <option key={st} value={st} className="bg-[var(--surface)] text-[var(--ink)] font-normal">
-                  {st}
-                </option>
-              ))}
-            </select>
+          {/* Stage Selector Pill */}
+          <div className="shrink-0 flex items-center" onClick={(e) => e.stopPropagation()}>
+            <div className={`status-badge ${getStatusClass(job.status)} relative`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[job.status]}`} />
+              <select
+                value={job.status}
+                onChange={handleStatusSelect}
+                aria-label="Application stage"
+                className="bg-transparent font-medium text-[11px] focus:outline-none cursor-pointer appearance-none pr-0.5"
+              >
+                {STATUS_LIST.map((st) => (
+                  <option
+                    key={st}
+                    value={st}
+                    className="bg-[var(--surface)] text-[var(--ink)] font-normal"
+                  >
+                    {st}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Due Follow-up banner */}
-        {isDue && (
-          <div className="mt-2 text-[11px] font-semibold text-[var(--danger)] flex items-center gap-1 bg-[var(--danger)]/8 px-2 py-0.5 rounded-md">
-            <Clock className="w-3 h-3 shrink-0" />
-            <span>Follow up {job.followup_date ? fmtDate(job.followup_date) : ''} (due)</span>
+        {/* Optional Metadata Pills (Salary / Location) */}
+        {(job.salary || job.location || isDue) && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            {isDue && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-[var(--danger-light)] text-[var(--danger)] tabular-nums">
+                <Clock className="w-3 h-3 shrink-0" />
+                Follow up {job.followup_date ? fmtDate(job.followup_date) : 'due'}
+              </span>
+            )}
+            {job.salary && (
+              <span className="px-1.5 py-0.5 rounded bg-[var(--surface-subtle)] text-[var(--ink-secondary)] text-[11px] font-medium tabular-nums">
+                {job.salary}
+              </span>
+            )}
+            {job.location && (
+              <span className="px-1.5 py-0.5 rounded bg-[var(--surface-subtle)] text-[var(--muted)] text-[11px] truncate max-w-[140px]">
+                {job.location}
+              </span>
+            )}
           </div>
         )}
 
         {/* Notes preview */}
         {job.notes && (
-          <p className="mt-2 text-xs text-[var(--muted)] line-clamp-2 leading-relaxed">
+          <p className="mt-2 text-[12px] text-[var(--muted)] line-clamp-2 leading-relaxed">
             {job.notes}
           </p>
         )}
       </div>
 
-      {/* Metadata strip */}
-      <div className="pt-2 border-t border-[var(--line-subtle)] flex items-center justify-between text-[11px] text-[var(--muted)]">
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          {job.applied_date && (
-            <span className="flex items-center gap-1" title="Date Applied">
-              <Calendar className="w-3 h-3" />
-              <span>{fmtDate(job.applied_date)}</span>
-            </span>
-          )}
-
-          {job.location && (
-            <span className="flex items-center gap-1 truncate max-w-[110px]" title="Location">
-              <MapPin className="w-3 h-3 shrink-0" />
-              <span className="truncate">{job.location}</span>
-            </span>
+      {/* Footer Strip */}
+      <div className="pt-2.5 border-t border-[var(--line-subtle)] flex items-center justify-between text-[11px] text-[var(--muted)] tabular-nums">
+        <div className="flex items-center gap-2.5">
+          {job.applied_date ? (
+            <span>Applied {fmtDate(job.applied_date)}</span>
+          ) : (
+            <span>Added {fmtDate(new Date(job.created_at).toISOString().slice(0, 10))}</span>
           )}
 
           {job.screenshots && job.screenshots.length > 0 && (
-            <span className="flex items-center gap-1 text-[var(--accent)] font-medium" title="Screenshots">
+            <button
+              type="button"
+              onClick={handlePreviewScreenshot}
+              className="inline-flex items-center gap-1 text-[var(--ink-secondary)] hover:text-[var(--ink)] font-medium cursor-pointer"
+              title="View screenshot"
+            >
               <ImageIcon className="w-3 h-3" />
               <span>{job.screenshots.length}</span>
-            </span>
+            </button>
           )}
         </div>
 
-        {/* Quick actions (reveal on hover) */}
-        <div className="flex items-center gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-          {job.link && (
-            <a
-              href={job.link}
-              target="_blank"
-              rel="noreferrer"
-              className="p-1 rounded text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] transition-colors"
-              title="Open job link"
-            >
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          )}
-          <button
-            onClick={() => onEdit(job)}
-            className="p-1 rounded text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-subtle)] transition-colors"
-            title="Edit"
-          >
-            <Edit2 className="w-3 h-3" />
-          </button>
-          <button
-            onClick={() => onDelete(job.id)}
-            className="p-1 rounded text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--surface-subtle)] transition-colors"
-            title="Delete"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(job.id);
+          }}
+          className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--muted-subtle)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] transition-all cursor-pointer"
+          title="Delete application"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
       </div>
     </div>
   );

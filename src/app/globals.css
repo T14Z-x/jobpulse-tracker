@@ -2,142 +2,148 @@
 
 @layer base {
   :root {
-    --bg: #f2f5f4;
+    --bg: #fafafa;
     --surface: #ffffff;
-    --surface-hover: #fafcfb;
-    --surface-subtle: #ebf0ee;
-    --ink: #14231f;
-    --muted: #5d6f69;
-    --line: #d9e2df;
-    --line-subtle: #e6edea;
-    --accent: #0f6b5c;
-    --accent-hover: #0a4f44;
-    --accent-light: #e4f2ee;
+    --surface-hover: #f5f5f6;
+    --surface-subtle: #f2f2f4;
+    --ink: #0f0f11;
+    --ink-secondary: #3f3f46;
+    --muted: #71717a;
+    --muted-subtle: #a1a1aa;
+    --line: #e4e4e7;
+    --line-subtle: #f0f0f2;
+    --accent: #18181b;
+    --accent-hover: #27272a;
+    --accent-light: #f4f4f5;
     --accent-ink: #ffffff;
-    --danger: #b3261e;
-    --danger-light: #fbeae9;
+    --brand: #2563eb;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
 
-    --s-saved-bg: #e6eae8;
-    --s-saved-ink: #3f4d49;
-    --s-saved-line: #cbd4d1;
+    --s-saved-bg: #f4f4f5;
+    --s-saved-ink: #52525b;
+    --s-saved-dot: #a1a1aa;
 
-    --s-applied-bg: #e1eef9;
-    --s-applied-ink: #185287;
-    --s-applied-line: #bfdaf2;
+    --s-applied-bg: #eff6ff;
+    --s-applied-ink: #1d4ed8;
+    --s-applied-dot: #3b82f6;
 
-    --s-interview-bg: #d7f1df;
-    --s-interview-ink: #16693a;
-    --s-interview-line: #b7e5c5;
+    --s-interview-bg: #f0fdf4;
+    --s-interview-ink: #15803d;
+    --s-interview-dot: #22c55e;
 
-    --s-offer-bg: #fbeea9;
-    --s-offer-ink: #755700;
-    --s-offer-line: #edd874;
+    --s-offer-bg: #fefce8;
+    --s-offer-ink: #a16207;
+    --s-offer-dot: #eab308;
 
-    --s-rejected-bg: #fadcd5;
-    --s-rejected-ink: #87281c;
-    --s-rejected-line: #f1b9ae;
+    --s-rejected-bg: #fef2f2;
+    --s-rejected-ink: #b91c1c;
+    --s-rejected-dot: #ef4444;
 
-    --s-ghosted-bg: #ece9f3;
-    --s-ghosted-ink: #554871;
-    --s-ghosted-line: #d4cee2;
+    --s-ghosted-bg: #f4f4f5;
+    --s-ghosted-ink: #71717a;
+    --s-ghosted-dot: #71717a;
   }
 
   .dark {
-    --bg: #0d1513;
-    --surface: #141f1c;
-    --surface-hover: #192723;
-    --surface-subtle: #192622;
-    --ink: #e6efec;
-    --muted: #8ca29b;
-    --line: #243530;
-    --line-subtle: #1c2b27;
-    --accent: #3db89f;
-    --accent-hover: #50caa0;
-    --accent-light: rgba(61, 184, 159, 0.12);
-    --accent-ink: #051d18;
-    --danger: #ff8a80;
-    --danger-light: rgba(255, 138, 128, 0.12);
+    --bg: #09090b;
+    --surface: #111113;
+    --surface-hover: #17171a;
+    --surface-subtle: #161619;
+    --ink: #f4f4f5;
+    --ink-secondary: #d4d4d8;
+    --muted: #8e8e96;
+    --muted-subtle: #52525b;
+    --line: #222226;
+    --line-subtle: #1a1a1e;
+    --accent: #f4f4f5;
+    --accent-hover: #e4e4e7;
+    --accent-light: rgba(255, 255, 255, 0.06);
+    --accent-ink: #09090b;
+    --brand: #60a5fa;
+    --danger: #f87171;
+    --danger-light: rgba(248, 113, 113, 0.1);
 
-    --s-saved-bg: #222d2a;
-    --s-saved-ink: #a5b6b1;
-    --s-saved-line: #313f3b;
+    --s-saved-bg: rgba(161, 161, 170, 0.1);
+    --s-saved-ink: #a1a1aa;
+    --s-saved-dot: #71717a;
 
-    --s-applied-bg: #172c3d;
-    --s-applied-ink: #7db8ed;
-    --s-applied-line: #22415a;
+    --s-applied-bg: rgba(59, 130, 246, 0.12);
+    --s-applied-ink: #93c5fd;
+    --s-applied-dot: #60a5fa;
 
-    --s-interview-bg: #173827;
-    --s-interview-ink: #5fd891;
-    --s-interview-line: #234f37;
+    --s-interview-bg: rgba(34, 197, 94, 0.12);
+    --s-interview-ink: #86efac;
+    --s-interview-dot: #4ade80;
 
-    --s-offer-bg: #3d3210;
-    --s-offer-ink: #f0cb53;
-    --s-offer-line: #5a4918;
+    --s-offer-bg: rgba(234, 179, 8, 0.12);
+    --s-offer-ink: #fde047;
+    --s-offer-dot: #facc15;
 
-    --s-rejected-bg: #3c2019;
-    --s-rejected-ink: #f08375;
-    --s-rejected-line: #572d24;
+    --s-rejected-bg: rgba(239, 68, 68, 0.12);
+    --s-rejected-ink: #fca5a5;
+    --s-rejected-dot: #f87171;
 
-    --s-ghosted-bg: #282334;
-    --s-ghosted-ink: #aba0c7;
-    --s-ghosted-line: #3b334c;
+    --s-ghosted-bg: rgba(113, 113, 122, 0.1);
+    --s-ghosted-ink: #71717a;
+    --s-ghosted-dot: #52525b;
   }
 }
 
 body {
   background-color: var(--bg);
   color: var(--ink);
-  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
-  letter-spacing: -0.011em;
+  font-family: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.014em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Status Badges */
+/* Tabular numbers for stats, dates, counts */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status Badges — precision micro-pills */
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: 9999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border-width: 1px;
-  line-height: 1.2;
-  transition: all 0.15s ease;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  transition: all 0.12s ease;
 }
 
 .status-saved {
   background-color: var(--s-saved-bg);
   color: var(--s-saved-ink);
-  border-color: var(--s-saved-line);
 }
 .status-applied {
   background-color: var(--s-applied-bg);
   color: var(--s-applied-ink);
-  border-color: var(--s-applied-line);
 }
 .status-interview {
   background-color: var(--s-interview-bg);
   color: var(--s-interview-ink);
-  border-color: var(--s-interview-line);
 }
 .status-offer {
   background-color: var(--s-offer-bg);
   color: var(--s-offer-ink);
-  border-color: var(--s-offer-line);
 }
 .status-rejected {
   background-color: var(--s-rejected-bg);
   color: var(--s-rejected-ink);
-  border-color: var(--s-rejected-line);
 }
 .status-ghosted {
   background-color: var(--s-ghosted-bg);
   color: var(--s-ghosted-ink);
-  border-color: var(--s-ghosted-line);
 }
 
-/* Custom scrollbars */
+/* Minimal scrollbars */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -150,5 +156,5 @@ body {
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--muted-subtle);
 }
