@@ -14,11 +14,14 @@ import {
   RefreshCw,
   Sparkles,
   Building2,
+  X,
+  RotateCcw,
 } from 'lucide-react';
 
 interface DiscoverFeedProps {
   existingJobs: Job[];
   onSaveToPipeline: (job: Job) => void;
+  onRemoveFromPipeline: (id: string) => void;
   onNotify: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
@@ -43,6 +46,7 @@ type SourceFilter = 'All' | 'LinkedIn BD' | 'BDJobs' | 'Remotive' | 'Arbeitnow';
 export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
   existingJobs,
   onSaveToPipeline,
+  onRemoveFromPipeline,
   onNotify,
 }) => {
   const [searchInput, setSearchInput] = useState('');
@@ -51,6 +55,10 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('All');
   const [discovered, setDiscovered] = useState<DiscoveredJob[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Track jobs where the user clicked "Apply" and is currently viewing the external page,
+  // awaiting confirmation of whether they actually submitted the application
+  const [pendingApplyIds, setPendingApplyIds] = useState<Record<string, DiscoveredJob>>({});
 
   const fetchFeed = useCallback(
     async (q: string, m: MarketFilter) => {
@@ -99,6 +107,7 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
     const fDate = new Date();
     fDate.setDate(fDate.getDate() + 7);
     const followup = fDate.toISOString().slice(0, 10);
+    const defaultCv = getStoredResumes().find((r) => r.isDefault);
 
     return {
       id: 'job_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -110,6 +119,7 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
       type: 'Full-time',
       status,
       salary: d.salary,
+      resume_version: defaultCv?.label,
       applied_date: status === 'Applied' ? today : undefined,
       followup_date: status === 'Applied' ? followup : undefined,
       notes: `Discovered via ${d.source} (${
@@ -128,9 +138,16 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
     }
     const newJob = convertToPipelineJob(d, 'Saved');
     onSaveToPipeline(newJob);
+    setPendingApplyIds((prev) => {
+      const next = { ...prev };
+      delete next[d.id];
+      return next;
+    });
   };
 
-  const handleApplyAndTrack = (d: DiscoveredJob) => {
+  // Step 1: User clicks "Apply ↗" -> opens external job page & copies cover note,
+  // then asks "Did you apply?" before logging to pipeline!
+  const handleLaunchApply = (d: DiscoveredJob) => {
     window.open(d.url, '_blank', 'noopener,noreferrer');
     try {
       const note = generateTailoredCoverNote(d.company, d.title);
@@ -139,13 +156,21 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
       // clipboard permission optional
     }
 
-    const defaultCv = getStoredResumes().find((r) => r.isDefault);
     const existing = findPipelineMatch(d);
+    if (existing?.status === 'Applied') return;
+
+    setPendingApplyIds((prev) => ({ ...prev, [d.id]: d }));
+  };
+
+  // Step 2: User confirms "Yes, I applied" -> logs into Applied pipeline
+  const handleConfirmApplied = (d: DiscoveredJob) => {
+    const existing = findPipelineMatch(d);
+    const defaultCv = getStoredResumes().find((r) => r.isDefault);
+
     if (!existing) {
       const newJob = convertToPipelineJob(d, 'Applied');
-      if (defaultCv) newJob.resume_version = defaultCv.label;
       onSaveToPipeline(newJob);
-    } else if (existing.status === 'Saved') {
+    } else {
       const today = new Date().toISOString().slice(0, 10);
       const fDate = new Date();
       fDate.setDate(fDate.getDate() + 7);
@@ -157,6 +182,20 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
         resume_version: defaultCv?.label || existing.resume_version,
       });
     }
+
+    setPendingApplyIds((prev) => {
+      const next = { ...prev };
+      delete next[d.id];
+      return next;
+    });
+  };
+
+  const handleDismissPending = (id: string) => {
+    setPendingApplyIds((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const sourceCounts = useMemo(() => {
@@ -191,8 +230,47 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
     }
   };
 
+  const pendingList = Object.values(pendingApplyIds);
+
   return (
     <div className="space-y-4">
+      {/* Floating / Top Confirmation Banner if user opened job tabs */}
+      {pendingList.length > 0 && (
+        <div className="p-3 rounded-xl bg-[var(--surface)] border border-amber-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-sm animate-in fade-in duration-150">
+          <div className="text-[12px] text-[var(--ink)]">
+            <span className="font-semibold">Did you finish applying to {pendingList[pendingList.length - 1].company}</span>{' '}
+            <span className="text-[var(--muted)]">
+              ({pendingList[pendingList.length - 1].title})? Confirm to add it to your Applied pipeline:
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleConfirmApplied(pendingList[pendingList.length - 1])}
+              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-semibold flex items-center gap-1 cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Yes, mark Applied</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSaveJob(pendingList[pendingList.length - 1])}
+              className="px-2.5 py-1.5 rounded-lg border border-[var(--line)] hover:bg-[var(--surface-hover)] text-[12px] font-medium text-[var(--ink-secondary)] cursor-pointer"
+            >
+              Save for later
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDismissPending(pendingList[pendingList.length - 1].id)}
+              className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] cursor-pointer"
+              title="No, didn't apply"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Control Header: Market Tabs + Search */}
       <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--line)] space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -353,10 +431,10 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
         </div>
       </div>
 
-      {/* Results Grid */}
+      {/* Results Grid (Full-width responsive columns) */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-8">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 pb-8">
+          {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
               className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--line)] h-40 animate-pulse flex flex-col justify-between"
@@ -383,15 +461,20 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 pb-8">
           {filteredJobs.map((item) => {
             const matchedJob = findPipelineMatch(item);
+            const isPendingConfirm = Boolean(pendingApplyIds[item.id]);
             const initial = (item.company || '?').trim().charAt(0).toUpperCase();
 
             return (
               <div
                 key={item.id}
-                className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--muted-subtle)] transition-all flex flex-col justify-between gap-3"
+                className={`p-4 rounded-xl bg-[var(--surface)] border transition-all flex flex-col justify-between gap-3 ${
+                  isPendingConfirm
+                    ? 'border-amber-500/60 ring-1 ring-amber-500/20'
+                    : 'border-[var(--line)] hover:border-[var(--muted-subtle)]'
+                }`}
               >
                 <div>
                   {/* Header: Logo/Initial + Company + Source Badge */}
@@ -447,32 +530,91 @@ export const DiscoverFeed: React.FC<DiscoverFeedProps> = ({
                   </div>
                 </div>
 
-                {/* Action Footer */}
-                <div className="pt-2.5 border-t border-[var(--line-subtle)] flex items-center justify-between gap-2">
-                  {matchedJob ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>In pipeline ({matchedJob.status})</span>
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSaveJob(item)}
-                      className="px-2.5 py-1.5 rounded-lg border border-[var(--line)] hover:border-[var(--muted-subtle)] hover:bg-[var(--surface-hover)] text-[12px] font-medium text-[var(--ink-secondary)] flex items-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Bookmark className="w-3.5 h-3.5" />
-                      <span>Save</span>
-                    </button>
-                  )}
+                {/* Action Footer: 3 States (1. Pending "Did you apply?", 2. Already in Pipeline with Undo, 3. Default Save / Apply) */}
+                <div className="pt-2.5 border-t border-[var(--line-subtle)]">
+                  {isPendingConfirm ? (
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="text-[11px] font-semibold text-amber-500">
+                        Did you apply?
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmApplied(item)}
+                          className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>Yes, Applied</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDismissPending(item.id)}
+                          className="px-2 py-1 rounded-md border border-[var(--line)] hover:bg-[var(--surface-hover)] text-[11px] font-medium text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  ) : matchedJob ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 truncate">
+                          <Check className="w-3.5 h-3.5 shrink-0" />
+                          <span>{matchedJob.status}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => onRemoveFromPipeline(matchedJob.id)}
+                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                          title="Undo / Remove from pipeline"
+                        >
+                          <RotateCcw className="w-2.5 h-2.5" />
+                          <span>Undo</span>
+                        </button>
+                      </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleApplyAndTrack(item)}
-                    className="ml-auto px-3 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] text-[12px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
-                  >
-                    <span>{matchedJob?.status === 'Applied' ? 'View posting' : 'Apply & Track'}</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {matchedJob.status === 'Saved' && (
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmApplied(item)}
+                            className="px-2 py-1 rounded-md bg-emerald-600/15 text-emerald-500 hover:bg-emerald-600/25 text-[11px] font-semibold cursor-pointer"
+                          >
+                            Mark Applied
+                          </button>
+                        )}
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-1 rounded-md border border-[var(--line)] hover:bg-[var(--surface-hover)] text-[11px] font-medium text-[var(--ink-secondary)] inline-flex items-center gap-1"
+                        >
+                          <span>Posting</span>
+                          <ArrowUpRight className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSaveJob(item)}
+                        className="px-2.5 py-1.5 rounded-lg border border-[var(--line)] hover:border-[var(--muted-subtle)] hover:bg-[var(--surface-hover)] text-[12px] font-medium text-[var(--ink-secondary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <Bookmark className="w-3.5 h-3.5" />
+                        <span>Save</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleLaunchApply(item)}
+                        className="ml-auto px-3 py-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] text-[12px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                      >
+                        <span>Apply</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

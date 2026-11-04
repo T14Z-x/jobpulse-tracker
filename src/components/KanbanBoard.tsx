@@ -61,7 +61,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             key={status}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
-            className="w-[276px] min-w-[276px] shrink-0 flex flex-col rounded-xl bg-[var(--surface-subtle)]/50 border border-[var(--line-subtle)] p-2 min-h-[480px]"
+            className="flex-1 min-w-[270px] flex flex-col rounded-xl bg-[var(--surface-subtle)]/50 border border-[var(--line-subtle)] p-2 min-h-[480px]"
           >
             {/* Column Header */}
             <div className="flex items-center justify-between px-2 py-1.5 mb-2">

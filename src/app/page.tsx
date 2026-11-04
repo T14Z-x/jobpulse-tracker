@@ -274,11 +274,12 @@ export default function Home() {
       />
 
       {/* Main Workspace */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-5">
         {activeTab === 'discover' ? (
           <DiscoverFeed
             existingJobs={jobs}
             onSaveToPipeline={handleSaveJob}
+            onRemoveFromPipeline={handleDeleteJob}
             onNotify={addToast}
           />
         ) : (
@@ -413,7 +414,7 @@ export default function Home() {
                 onQuickAdd={(st) => handleOpenAddModal(st)}
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 pb-8">
                 {filteredJobs.map((job) => (
                   <JobCard
                     key={job.id}
@@ -433,7 +434,7 @@ export default function Home() {
 
       {/* Minimal Footer */}
       <footer className="mt-auto border-t border-[var(--line-subtle)] py-4 text-xs text-[var(--muted)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--ink)]">JobPulse</span>
             <span>·</span>
