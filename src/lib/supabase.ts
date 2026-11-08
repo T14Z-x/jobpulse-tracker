@@ -7,10 +7,16 @@ let cachedClient: SupabaseClient | null = null;
 let lastUsedConfig: { url: string; anonKey: string } | null = null;
 
 export function getStoredSupabaseConfig(): { url: string; anonKey: string } {
+  const envKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+    '';
+
   if (typeof window === 'undefined') {
     return {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+      anonKey: envKey,
     };
   }
 
@@ -19,7 +25,7 @@ export function getStoredSupabaseConfig(): { url: string; anonKey: string } {
 
   return {
     url: storedUrl || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    anonKey: storedKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    anonKey: storedKey || envKey,
   };
 }
 
@@ -80,7 +86,7 @@ export async function testSupabaseConnection(url: string, anonKey: string): Prom
     // Attempt a light query to check connection
     const { error } = await client.from('jobs').select('id').limit(1);
     if (error) {
-      if (error.code === '42P01') {
+      if (error.code === '42P01' || error.code === 'PGRST205') {
         return {
           success: true,
           message: 'Connected to Supabase! (Note: The `jobs` table does not exist yet. Run the SQL schema to create it.)',
