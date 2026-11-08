@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Job, JobStatus, WorkplaceType } from '@/types/job';
 import { fetchAllJobs, saveJobToStorage, deleteJobFromStorage } from '@/lib/storage';
+import { getSupabaseClient } from '@/lib/supabase';
+import { syncVaultFromCloud } from '@/lib/cv-storage';
 import { Navbar, WorkspaceTab } from '@/components/Navbar';
 import { StatsBar } from '@/components/StatsBar';
 import { FilterBar, ViewMode, SortOption } from '@/components/FilterBar';
@@ -11,6 +13,7 @@ import { JobCard } from '@/components/JobCard';
 import { DiscoverFeed } from '@/components/DiscoverFeed';
 import { JobModal } from '@/components/JobModal';
 import { CvVaultModal } from '@/components/CvVaultModal';
+import { AuthModal } from '@/components/AuthModal';
 import { DatabaseModal } from '@/components/DatabaseModal';
 import { ImportExportModal } from '@/components/ImportExportModal';
 import { ScreenshotLightbox } from '@/components/ScreenshotLightbox';
@@ -22,6 +25,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('pipeline');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [source, setSource] = useState<'supabase' | 'local'>('local');
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [todayStr, setTodayStr] = useState('');
 
@@ -46,6 +50,7 @@ export default function Home() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [modalInitialStatus, setModalInitialStatus] = useState<JobStatus>('Applied');
   const [isCvVaultModalOpen, setIsCvVaultModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -95,6 +100,16 @@ export default function Home() {
 
   const loadAllData = async () => {
     setLoading(true);
+    const supabase = getSupabaseClient();
+    if (supabase) {
+      const { data } = await supabase.auth.getUser();
+      setUserEmail(data?.user?.email || null);
+      if (data?.user) {
+        await syncVaultFromCloud();
+      }
+    } else {
+      setUserEmail(null);
+    }
     const result = await fetchAllJobs();
     setJobs(result.jobs);
     setSource(result.source);
@@ -265,10 +280,12 @@ export default function Home() {
         onTabChange={setActiveTab}
         pipelineCount={jobs.length}
         source={source}
+        userEmail={userEmail}
         darkMode={darkMode}
         onToggleTheme={toggleTheme}
         onOpenAddModal={() => handleOpenAddModal('Applied')}
         onOpenCvVaultModal={() => setIsCvVaultModalOpen(true)}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
         onOpenImportExportModal={() => setIsImportExportModalOpen(true)}
       />
@@ -490,6 +507,15 @@ export default function Home() {
       <CvVaultModal
         isOpen={isCvVaultModalOpen}
         onClose={() => setIsCvVaultModalOpen(false)}
+        onNotify={addToast}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        userEmail={userEmail}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthChange={loadAllData}
+        onOpenDatabaseSetup={() => setIsDatabaseModalOpen(true)}
         onNotify={addToast}
       />
 

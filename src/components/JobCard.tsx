@@ -4,7 +4,8 @@ import React from 'react';
 import { Job, JobStatus } from '@/types/job';
 import { STATUS_LIST } from './FilterBar';
 import { getScreenshot } from '@/lib/idb';
-import { ExternalLink, Image as ImageIcon, Clock, Trash2 } from 'lucide-react';
+import { generateFollowUpMessage } from '@/lib/cv-storage';
+import { ExternalLink, Image as ImageIcon, Clock, Trash2, Copy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface JobCardProps {
@@ -154,10 +155,31 @@ export const JobCard: React.FC<JobCardProps> = ({
         {(job.salary || job.location || isDue) && (
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             {isDue && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-[var(--danger-light)] text-[var(--danger)] tabular-nums">
-                <Clock className="w-3 h-3 shrink-0" />
-                Follow up {job.followup_date ? fmtDate(job.followup_date) : 'due'}
-              </span>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-[var(--danger-light)] text-[var(--danger)] tabular-nums">
+                  <Clock className="w-3 h-3 shrink-0" />
+                  Follow up {job.followup_date ? fmtDate(job.followup_date) : 'due'}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const msg = generateFollowUpMessage(job.company, job.title, job.applied_date);
+                    navigator.clipboard.writeText(msg);
+                    const nextDate = new Date();
+                    nextDate.setDate(nextDate.getDate() + 7);
+                    onStatusChange(
+                      { ...job, followup_date: nextDate.toISOString().slice(0, 10) },
+                      job.status
+                    );
+                  }}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-[var(--line)] bg-[var(--surface-subtle)] hover:bg-[var(--surface-hover)] text-[var(--ink)] cursor-pointer"
+                  title="Copy follow-up message & bump reminder +7 days"
+                >
+                  <Copy className="w-2.5 h-2.5" />
+                  <span>Copy msg & +7d</span>
+                </button>
+              </div>
             )}
             {job.salary && (
               <span className="px-1.5 py-0.5 rounded bg-[var(--surface-subtle)] text-[var(--ink-secondary)] text-[11px] font-medium tabular-nums">

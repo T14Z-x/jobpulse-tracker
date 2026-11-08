@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, Database, Download, Sun, Moon, Activity, Compass, FileText } from 'lucide-react';
+import { Plus, Database, Download, Sun, Moon, Activity, Compass, FileText, User } from 'lucide-react';
 
 export type WorkspaceTab = 'pipeline' | 'discover';
 
@@ -10,10 +10,12 @@ interface NavbarProps {
   onTabChange: (tab: WorkspaceTab) => void;
   pipelineCount: number;
   source: 'supabase' | 'local';
+  userEmail: string | null;
   darkMode: boolean;
   onToggleTheme: () => void;
   onOpenAddModal: () => void;
   onOpenCvVaultModal: () => void;
+  onOpenAuthModal: () => void;
   onOpenDatabaseModal: () => void;
   onOpenImportExportModal: () => void;
 }
@@ -23,10 +25,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onTabChange,
   pipelineCount,
   source,
+  userEmail,
   darkMode,
   onToggleTheme,
   onOpenAddModal,
   onOpenCvVaultModal,
+  onOpenAuthModal,
   onOpenDatabaseModal,
   onOpenImportExportModal,
 }) => {
@@ -86,6 +90,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <FileText className="w-3.5 h-3.5 text-[var(--muted)]" />
             <span>CV Vault</span>
+          </button>
+
+          {/* User Account / Sign In */}
+          <button
+            onClick={onOpenAuthModal}
+            className="px-2.5 py-1.5 rounded-lg border border-[var(--line)] hover:border-[var(--muted-subtle)] bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--ink)] text-[12px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            title={userEmail ? `Signed in as ${userEmail}` : 'Sign in or create a cloud account'}
+          >
+            <User className={`w-3.5 h-3.5 ${userEmail ? 'text-emerald-500' : 'text-[var(--muted)]'}`} />
+            <span className="max-w-[110px] truncate">
+              {userEmail ? userEmail.split('@')[0] : 'Sign in'}
+            </span>
           </button>
 
           <button

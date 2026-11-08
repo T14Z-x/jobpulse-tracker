@@ -12,9 +12,10 @@ interface DatabaseModalProps {
   onNotify: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
-const SUPABASE_SCHEMA_SQL = `-- Run this in your Supabase SQL Editor:
+const SUPABASE_SCHEMA_SQL = `-- Run this in your Supabase SQL Editor (Supports Multi-User Auth + Cloud CV Vault):
 CREATE TABLE IF NOT EXISTS public.jobs (
   id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   company TEXT NOT NULL,
   title TEXT NOT NULL,
   link TEXT,
@@ -35,13 +36,65 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS jobs_user_id_idx ON public.jobs (user_id);
 ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.jobs TO anon, authenticated;
 
-CREATE POLICY "Allow public read and write for jobs"
-  ON public.jobs
-  FOR ALL
-  USING (true)
-  WITH CHECK (true);`;
+DROP POLICY IF EXISTS "Allow public read and write for jobs" ON public.jobs;
+DROP POLICY IF EXISTS "Users manage own jobs" ON public.jobs;
+DROP POLICY IF EXISTS "Anon manage public jobs" ON public.jobs;
+
+CREATE POLICY "Users manage own jobs"
+  ON public.jobs FOR ALL TO authenticated
+  USING ((select auth.uid()) = user_id)
+  WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Anon manage public jobs"
+  ON public.jobs FOR ALL TO anon
+  USING (user_id IS NULL)
+  WITH CHECK (user_id IS NULL);
+
+CREATE TABLE IF NOT EXISTS public.profiles (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  email TEXT,
+  phone TEXT,
+  linkedin_url TEXT,
+  portfolio_url TEXT,
+  expected_salary TEXT,
+  notice_period TEXT,
+  cover_note_template TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.profiles TO authenticated;
+DROP POLICY IF EXISTS "Users manage own profile" ON public.profiles;
+CREATE POLICY "Users manage own profile"
+  ON public.profiles FOR ALL TO authenticated
+  USING ((select auth.uid()) = user_id)
+  WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE TABLE IF NOT EXISTS public.resumes (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  file_size INTEGER NOT NULL DEFAULT 0,
+  file_data TEXT,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  created_at BIGINT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS resumes_user_id_idx ON public.resumes (user_id);
+ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.resumes TO authenticated;
+DROP POLICY IF EXISTS "Users manage own resumes" ON public.resumes;
+CREATE POLICY "Users manage own resumes"
+  ON public.resumes FOR ALL TO authenticated
+  USING ((select auth.uid()) = user_id)
+  WITH CHECK ((select auth.uid()) = user_id);`;
 
 export const DatabaseModal: React.FC<DatabaseModalProps> = ({
   isOpen,

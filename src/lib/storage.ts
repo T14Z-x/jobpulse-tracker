@@ -181,7 +181,10 @@ export async function saveJobToStorage(job: Job): Promise<{ success: boolean; so
   const supabase = getSupabaseClient();
   if (supabase) {
     try {
-      const payload = {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id || null;
+
+      const payload: Record<string, unknown> = {
         id: job.id,
         company: job.company,
         title: job.title,
@@ -201,6 +204,9 @@ export async function saveJobToStorage(job: Job): Promise<{ success: boolean; so
         screenshots: job.screenshots || [],
         updated_at: new Date().toISOString(),
       };
+      if (userId) {
+        payload.user_id = userId;
+      }
 
       const { error } = await supabase.from('jobs').upsert(payload);
       if (!error) {
@@ -258,27 +264,36 @@ export async function syncLocalToSupabase(): Promise<{ syncedCount: number; erro
   }
 
   try {
-    const payload = localJobs.map((j) => ({
-      id: j.id,
-      company: j.company,
-      title: j.title,
-      link: j.link || null,
-      location: j.location || null,
-      status: j.status,
-      workplace: j.workplace || null,
-      type: j.type || null,
-      applied_date: j.applied_date || null,
-      followup_date: j.followup_date || null,
-      contact_name: j.contact_name || null,
-      contact_email: j.contact_email || null,
-      salary: j.salary || null,
-      resume_version: j.resume_version || null,
-      notes: j.notes || null,
-      tags: j.tags || [],
-      screenshots: j.screenshots || [],
-      created_at: new Date(j.created_at).toISOString(),
-      updated_at: new Date().toISOString(),
-    }));
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id || null;
+
+    const payload = localJobs.map((j) => {
+      const row: Record<string, unknown> = {
+        id: userId && !j.id.startsWith(userId.slice(0, 6)) ? `${userId.slice(0, 6)}_${j.id}` : j.id,
+        company: j.company,
+        title: j.title,
+        link: j.link || null,
+        location: j.location || null,
+        status: j.status,
+        workplace: j.workplace || null,
+        type: j.type || null,
+        applied_date: j.applied_date || null,
+        followup_date: j.followup_date || null,
+        contact_name: j.contact_name || null,
+        contact_email: j.contact_email || null,
+        salary: j.salary || null,
+        resume_version: j.resume_version || null,
+        notes: j.notes || null,
+        tags: j.tags || [],
+        screenshots: j.screenshots || [],
+        created_at: new Date(j.created_at).toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      if (userId) {
+        row.user_id = userId;
+      }
+      return row;
+    });
 
     const { error } = await supabase.from('jobs').upsert(payload, { onConflict: 'id' });
     if (error) {
