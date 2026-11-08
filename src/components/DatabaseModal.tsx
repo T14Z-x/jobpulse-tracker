@@ -94,6 +94,23 @@ DROP POLICY IF EXISTS "Users manage own resumes" ON public.resumes;
 CREATE POLICY "Users manage own resumes"
   ON public.resumes FOR ALL TO authenticated
   USING ((select auth.uid()) = user_id)
+  WITH CHECK ((select auth.uid()) = user_id);
+
+-- 4. JOB SCREENSHOTS
+CREATE TABLE IF NOT EXISTS public.screenshots (
+  job_id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  image_data TEXT NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS screenshots_user_id_idx ON public.screenshots (user_id);
+ALTER TABLE public.screenshots ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.screenshots TO anon, authenticated;
+DROP POLICY IF EXISTS "Users manage own screenshots" ON public.screenshots;
+CREATE POLICY "Users manage own screenshots"
+  ON public.screenshots FOR ALL TO authenticated
+  USING ((select auth.uid()) = user_id)
   WITH CHECK ((select auth.uid()) = user_id);`;
 
 export const DatabaseModal: React.FC<DatabaseModalProps> = ({

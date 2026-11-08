@@ -1,7 +1,9 @@
--- Run this in your Supabase Dashboard -> SQL Editor -> New Query:
--- Supports BOTH Multi-User Accounts (Supabase Auth) AND Personal Cloud Mode!
+-- =====================================================================
+-- JOBPULSE - COMPLETE CLOUD & MULTI-USER SUPABASE SCHEMA
+-- Run this entire script in your Supabase Dashboard -> SQL Editor
+-- =====================================================================
 
--- 1. Jobs Pipeline Table
+-- 1. JOBS PIPELINE TABLE
 CREATE TABLE IF NOT EXISTS public.jobs (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -25,9 +27,13 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Ensure user_id column exists if upgrading from an older table
 ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
-CREATE INDEX IF NOT EXISTS jobs_user_id_idx ON public.jobs (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON public.jobs(user_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON public.jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_followup ON public.jobs(followup_date);
+CREATE INDEX IF NOT EXISTS idx_jobs_company ON public.jobs(company);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON public.jobs(created_at DESC);
 
 ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
 GRANT ALL ON TABLE public.jobs TO anon, authenticated;
@@ -36,7 +42,6 @@ DROP POLICY IF EXISTS "Allow public read and write for jobs" ON public.jobs;
 DROP POLICY IF EXISTS "Users manage own jobs" ON public.jobs;
 DROP POLICY IF EXISTS "Anon manage public jobs" ON public.jobs;
 
--- Authenticated users strictly access only their own rows
 CREATE POLICY "Users manage own jobs"
   ON public.jobs
   FOR ALL
@@ -44,7 +49,6 @@ CREATE POLICY "Users manage own jobs"
   USING ((select auth.uid()) = user_id)
   WITH CHECK ((select auth.uid()) = user_id);
 
--- Unauthenticated (personal mode) can access rows with user_id IS NULL
 CREATE POLICY "Anon manage public jobs"
   ON public.jobs
   FOR ALL
@@ -53,7 +57,7 @@ CREATE POLICY "Anon manage public jobs"
   WITH CHECK (user_id IS NULL);
 
 
--- 2. Candidate Profiles Table (Quick-Copy Snippets & Cover Note Template)
+-- 2. CANDIDATE PROFILES TABLE
 CREATE TABLE IF NOT EXISTS public.profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
@@ -79,7 +83,7 @@ CREATE POLICY "Users manage own profile"
   WITH CHECK ((select auth.uid()) = user_id);
 
 
--- 3. Cloud CV Vault Table
+-- 3. CLOUD CV VAULT TABLE
 CREATE TABLE IF NOT EXISTS public.resumes (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -91,7 +95,7 @@ CREATE TABLE IF NOT EXISTS public.resumes (
   created_at BIGINT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS resumes_user_id_idx ON public.resumes (user_id);
+CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON public.resumes(user_id);
 ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
 GRANT ALL ON TABLE public.resumes TO authenticated;
 
@@ -102,3 +106,53 @@ CREATE POLICY "Users manage own resumes"
   TO authenticated
   USING ((select auth.uid()) = user_id)
   WITH CHECK ((select auth.uid()) = user_id);
+
+
+-- 4. CLOUD SCREENSHOTS TABLE
+CREATE TABLE IF NOT EXISTS public.screenshots (
+  id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  data TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+CREATE INDEX IF NOT EXISTS idx_screenshots_user_id ON public.screenshots(user_id);
+ALTER TABLE public.screenshots ENABLE ROW LEVEL SECURITY;
+GRANT ALL ON TABLE public.screenshots TO anon, authenticated;
+
+DROP POLICY IF EXISTS "Users manage own screenshots" ON public.screenshots;
+DROP POLICY IF EXISTS "Anon manage public screenshots" ON public.screenshots;
+
+CREATE POLICY "Users manage own screenshots"
+  ON public.screenshots
+  FOR ALL
+  TO authenticated
+  USING ((select auth.uid()) = user_id)
+  WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Anon manage public screenshots"
+  ON public.screenshots
+  FOR ALL
+  TO anon
+  USING (user_id IS NULL)
+  WITH CHECK (user_id IS NULL);
+
+
+-- 5. AUTO-UPDATE updated_at TIMESTAMP TRIGGER
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public
+AS $$
+BEGIN
+  NEW.updated_at = timezone('utc'::text, now());
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_jobs_updated_at ON public.jobs;
+CREATE TRIGGER trigger_jobs_updated_at
+  BEFORE UPDATE ON public.jobs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();

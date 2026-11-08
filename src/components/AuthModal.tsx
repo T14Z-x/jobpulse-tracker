@@ -93,9 +93,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleSignOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
-    onNotify('info', 'Signed out');
+    localStorage.removeItem('jobtracker_v2_jobs');
+    localStorage.removeItem('pipeline.resumes.v1');
+    localStorage.removeItem('pipeline.profile.v1');
+    onNotify('info', 'Signed out & cleared session cache');
     onAuthChange();
     onClose();
+  };
+
+  const handleResetPassword = async () => {
+    if (!supabase) return;
+    if (!email.trim()) {
+      onNotify('error', 'Enter your email address above first');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+      if (error) throw error;
+      onNotify('success', 'Password reset email sent');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Could not send reset email';
+      onNotify('error', msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -222,9 +244,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-medium text-[var(--muted)]">
+                  Password
+                </label>
+                {mode === 'signin' && (
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    className="text-[11px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:underline cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 required
@@ -259,3 +292,4 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     </div>
   );
 };
+

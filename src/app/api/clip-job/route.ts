@@ -60,6 +60,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Valid URL is required' }, { status: 400 });
     }
 
+    // SSRF Protection for public cloud hosting: block localhost & private network IPs
+    try {
+      const parsedUrl = new URL(url);
+      const hn = parsedUrl.hostname.toLowerCase();
+      if (
+        hn === 'localhost' ||
+        hn === '127.0.0.1' ||
+        hn === '0.0.0.0' ||
+        hn.startsWith('10.') ||
+        hn.startsWith('192.168.') ||
+        hn.startsWith('169.254.') ||
+        hn.endsWith('.local')
+      ) {
+        return NextResponse.json({ error: 'Private network URLs are not allowed' }, { status: 400 });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
+    }
+
     let company = inferCompanyFromDomain(url);
     let title = '';
     let location = '';
