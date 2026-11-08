@@ -15,7 +15,7 @@ import {
   Copy,
   RefreshCw,
 } from 'lucide-react';
-import { generateTailoredCoverNote, getStoredResumes } from '@/lib/cv-storage';
+import { generateTailoredCoverNote } from '@/lib/cv-storage';
 
 interface JobModalProps {
   isOpen: boolean;
@@ -163,7 +163,9 @@ export const JobModal: React.FC<JobModalProps> = ({
       setShowMore(false);
     }
 
-    setTimeout(() => companyInputRef.current?.focus(), 40);
+    if (window.innerWidth >= 640) {
+      setTimeout(() => companyInputRef.current?.focus(), 40);
+    }
   }, [isOpen, job, initialStatus]);
 
   useEffect(() => {
@@ -323,65 +325,65 @@ export const JobModal: React.FC<JobModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 backdrop-blur-[2px] p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg bg-[var(--surface)] text-[var(--ink)] rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150"
+        className="relative w-full max-w-lg bg-[var(--surface)] text-[var(--ink)] rounded-t-2xl sm:rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden max-h-[92dvh] overflow-y-auto sm:my-8 animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Top bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--line-subtle)]">
-          <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${STATUS_DOT[status]}`} />
-            <h2 className="text-[13px] font-semibold tracking-tight text-[var(--ink)]">
+        <div className="sticky top-0 z-10 bg-[var(--surface)] flex items-center justify-between px-5 py-4 border-b border-[var(--line-subtle)]">
+          <div className="flex items-center gap-2.5">
+            <span className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT[status]}`} />
+            <h2 className="text-[15px] sm:text-[16px] font-semibold tracking-tight text-[var(--ink)]">
               {job ? 'Edit application' : 'New application'}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Primary Identity: Company & Role */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
+              <label className="block text-[13px] font-medium text-[var(--muted)] mb-1.5">
                 Company
               </label>
               <input
                 ref={companyInputRef}
                 type="text"
                 required
-                placeholder="Linear, Stripe, Vercel..."
+                placeholder="Linear, BRAC Bank, Pathao..."
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[13px] font-medium focus:outline-none focus:border-[var(--ink)] transition-colors"
+                className="w-full px-3.5 py-2.5 sm:py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[14px] font-medium focus:outline-none focus:border-[var(--ink)] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
+              <label className="block text-[13px] font-medium text-[var(--muted)] mb-1.5">
                 Role
               </label>
               <input
                 type="text"
                 required
-                placeholder="Product Engineer, Designer..."
+                placeholder="Marketing Executive, Engineer..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[13px] font-medium focus:outline-none focus:border-[var(--ink)] transition-colors"
+                className="w-full px-3.5 py-2.5 sm:py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[14px] font-medium focus:outline-none focus:border-[var(--ink)] transition-colors"
               />
             </div>
           </div>
 
           {/* Interactive Stage Pills */}
           <div>
-            <label className="block text-[11px] font-medium text-[var(--muted)] mb-1.5">
+            <label className="block text-[13px] font-medium text-[var(--muted)] mb-1.5">
               Stage
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
@@ -399,13 +401,13 @@ export const JobModal: React.FC<JobModalProps> = ({
                         setFollowupDate(addDays(7, t));
                       }
                     }}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                    className={`px-2.5 py-2 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                       active
                         ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--bg)] shadow-2xs'
                         : 'border-[var(--line)] bg-[var(--bg)] text-[var(--muted)] hover:text-[var(--ink)] hover:border-[var(--muted-subtle)]'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[st]}`} />
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[st]}`} />
                     <span className="truncate">{st}</span>
                   </button>
                 );
@@ -413,16 +415,16 @@ export const JobModal: React.FC<JobModalProps> = ({
             </div>
           </div>
 
-          {/* Job Link (single clean line with smart company detection + 1-click URL scraper) */}
-          <div className="flex gap-1.5">
+          {/* Job Link */}
+          <div className="flex gap-2">
             <div className="relative flex-1">
-              <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)] pointer-events-none" />
+              <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted)] pointer-events-none" />
               <input
                 type="url"
                 placeholder="Paste LinkedIn / BDJobs / Career URL to auto-fill..."
                 value={link}
                 onChange={(e) => handleLinkChange(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[13px] focus:outline-none focus:border-[var(--ink)] transition-colors"
+                className="w-full pl-9 pr-3.5 py-2.5 sm:py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[14px] focus:outline-none focus:border-[var(--ink)] transition-colors"
               />
             </div>
             {link.trim().startsWith('http') && (
@@ -430,30 +432,30 @@ export const JobModal: React.FC<JobModalProps> = ({
                 type="button"
                 disabled={clipping}
                 onClick={handleAutoFillFromUrl}
-                className="px-2.5 py-2 rounded-lg border border-[var(--line)] bg-[var(--surface-subtle)] hover:bg-[var(--surface-hover)] text-[11px] font-semibold text-[var(--ink)] flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                className="px-3 py-2 rounded-xl border border-[var(--line)] bg-[var(--surface-subtle)] hover:bg-[var(--surface-hover)] text-[13px] font-semibold text-[var(--ink)] flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
                 title="Scrape company, role, location & description from URL"
               >
                 {clipping ? (
-                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <Sparkles className="w-3 h-3" />
+                  <Sparkles className="w-3.5 h-3.5" />
                 )}
                 <span>{clipping ? 'Reading...' : 'Auto-fill'}</span>
               </button>
             )}
           </div>
 
-          {/* Notes + Screenshot Dropzone side-by-side or stacked cleanly */}
+          {/* Notes + Screenshot Dropzone */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-medium text-[var(--muted)]">Notes</span>
+              <span className="text-[13px] font-medium text-[var(--muted)]">Notes</span>
               {(company.trim() || title.trim()) && (
                 <button
                   type="button"
                   onClick={handleCopyCoverNote}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--ink-secondary)] hover:text-[var(--ink)] hover:underline cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-[var(--ink-secondary)] hover:text-[var(--ink)] hover:underline cursor-pointer"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-3.5 h-3.5" />
                   <span>Copy tailored cover note</span>
                 </button>
               )}
@@ -463,7 +465,7 @@ export const JobModal: React.FC<JobModalProps> = ({
               placeholder="Quick notes, referral, or key requirements (optional)..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[13px] focus:outline-none focus:border-[var(--ink)] transition-colors resize-none leading-relaxed"
+              className="w-full px-3.5 py-2.5 sm:py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[14px] focus:outline-none focus:border-[var(--ink)] transition-colors resize-none leading-relaxed"
             />
 
             {/* Compact Screenshot Bar */}
@@ -475,7 +477,7 @@ export const JobModal: React.FC<JobModalProps> = ({
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`px-3 py-2.5 rounded-lg border border-dashed flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+              className={`px-3.5 py-3 rounded-xl border border-dashed flex items-center justify-between gap-2 cursor-pointer transition-colors ${
                 isDragging
                   ? 'border-[var(--ink)] bg-[var(--surface-hover)]'
                   : 'border-[var(--line)] bg-[var(--bg)] hover:border-[var(--muted-subtle)]'
@@ -489,16 +491,19 @@ export const JobModal: React.FC<JobModalProps> = ({
                 multiple
                 className="hidden"
               />
-              <div className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
-                <ImageIcon className="w-3.5 h-3.5 text-[var(--muted)] shrink-0" />
+              <div className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
+                <ImageIcon className="w-4 h-4 text-[var(--muted)] shrink-0" />
                 <span>
-                  Drop posting screenshot or press{' '}
-                  <kbd className="px-1 py-0.5 rounded bg-[var(--surface)] border border-[var(--line)] text-[10px] font-mono text-[var(--ink)]">
-                    ⌘V
-                  </kbd>
+                  Attach job screenshot{' '}
+                  <span className="hidden sm:inline">
+                    or press{' '}
+                    <kbd className="px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--line)] text-[11px] font-mono text-[var(--ink)]">
+                      ⌘V
+                    </kbd>
+                  </span>
                 </span>
               </div>
-              <span className="text-[11px] font-medium text-[var(--ink-secondary)] hover:underline">
+              <span className="text-[13px] font-semibold text-[var(--ink-secondary)] hover:underline">
                 Browse
               </span>
             </div>
@@ -508,7 +513,7 @@ export const JobModal: React.FC<JobModalProps> = ({
                 {screenshots.map((s, idx) => (
                   <div
                     key={s.id}
-                    className="relative group w-16 h-12 rounded-md overflow-hidden border border-[var(--line)] bg-[var(--bg)]"
+                    className="relative group w-18 h-14 rounded-lg overflow-hidden border border-[var(--line)] bg-[var(--bg)]"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -523,7 +528,7 @@ export const JobModal: React.FC<JobModalProps> = ({
                         e.stopPropagation();
                         setScreenshots((prev) => prev.filter((_, i) => i !== idx));
                       }}
-                      className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/75 text-white flex items-center justify-center text-[10px] cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 text-white flex items-center justify-center text-[11px] cursor-pointer"
                       title="Remove"
                     >
                       ×
@@ -539,12 +544,12 @@ export const JobModal: React.FC<JobModalProps> = ({
             <button
               type="button"
               onClick={() => setShowMore((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors cursor-pointer"
             >
               {showMore ? (
-                <ChevronUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-4 h-4" />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-4 h-4" />
               )}
               <span>
                 {showMore
@@ -552,44 +557,44 @@ export const JobModal: React.FC<JobModalProps> = ({
                   : 'Add compensation, dates, location & contact'}
               </span>
               {!showMore && extraCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-[var(--surface-subtle)] text-[var(--ink)] text-[10px] font-semibold">
+                <span className="px-2 py-0.5 rounded-full bg-[var(--surface-subtle)] text-[var(--ink)] text-[11.5px] font-semibold">
                   {extraCount} set
                 </span>
               )}
             </button>
 
             {showMore && (
-              <div className="mt-3 pt-3 border-t border-[var(--line-subtle)] space-y-3 animate-in fade-in duration-150">
+              <div className="mt-3.5 pt-3.5 border-t border-[var(--line-subtle)] space-y-3.5 animate-in fade-in duration-150">
                 {/* Salary & Location */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
-                    <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
+                    <label className="block text-[13px] font-medium text-[var(--muted)] mb-1">
                       Compensation
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. $160k – $190k"
+                      placeholder="e.g. BDT 65,000 / $120k"
                       value={salary}
                       onChange={(e) => setSalary(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[12px] focus:outline-none focus:border-[var(--ink)]"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[13.5px] focus:outline-none focus:border-[var(--ink)]"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
+                    <label className="block text-[13px] font-medium text-[var(--muted)] mb-1">
                       Location & Workplace
                     </label>
                     <div className="flex gap-1.5">
                       <input
                         type="text"
-                        placeholder="City or timezone"
+                        placeholder="Dhaka, Remote..."
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[12px] focus:outline-none focus:border-[var(--ink)]"
+                        className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[13.5px] focus:outline-none focus:border-[var(--ink)]"
                       />
                       <select
                         value={workplace}
                         onChange={(e) => setWorkplace(e.target.value as WorkplaceType)}
-                        className="px-2 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-[11px] font-medium focus:outline-none focus:border-[var(--ink)] cursor-pointer"
+                        className="px-2.5 py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-[13px] font-medium focus:outline-none focus:border-[var(--ink)] cursor-pointer"
                       >
                         <option value="Remote">Remote</option>
                         <option value="Hybrid">Hybrid</option>
@@ -600,16 +605,16 @@ export const JobModal: React.FC<JobModalProps> = ({
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-medium text-[var(--muted)]">
+                      <label className="text-[13px] font-medium text-[var(--muted)]">
                         Applied date
                       </label>
                       <button
                         type="button"
                         onClick={() => setAppliedDate(todayStr())}
-                        className="text-[10px] font-medium text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
+                        className="text-[12px] font-medium text-[var(--muted)] hover:text-[var(--ink)] cursor-pointer"
                       >
                         Today
                       </button>
@@ -618,15 +623,15 @@ export const JobModal: React.FC<JobModalProps> = ({
                       type="date"
                       value={appliedDate}
                       onChange={(e) => setAppliedDate(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-[12px] tabular-nums focus:outline-none focus:border-[var(--ink)]"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-[15px] sm:text-[13.5px] tabular-nums focus:outline-none focus:border-[var(--ink)]"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-medium text-[var(--muted)]">
+                      <label className="text-[13px] font-medium text-[var(--muted)]">
                         Follow-up reminder
                       </label>
-                      <div className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--muted)]">
+                      <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--muted)]">
                         <button
                           type="button"
                           onClick={() => setFollowupDate(addDays(3, appliedDate))}
@@ -656,14 +661,14 @@ export const JobModal: React.FC<JobModalProps> = ({
                       type="date"
                       value={followupDate}
                       onChange={(e) => setFollowupDate(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-[12px] tabular-nums focus:outline-none focus:border-[var(--ink)]"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] text-[15px] sm:text-[13.5px] tabular-nums focus:outline-none focus:border-[var(--ink)]"
                     />
                   </div>
                 </div>
 
                 {/* Contact */}
                 <div>
-                  <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
+                  <label className="block text-[13px] font-medium text-[var(--muted)] mb-1">
                     Recruiter / Contact
                   </label>
                   <input
@@ -671,7 +676,7 @@ export const JobModal: React.FC<JobModalProps> = ({
                     placeholder="Name, email, or LinkedIn URL"
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[12px] focus:outline-none focus:border-[var(--ink)]"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)] placeholder-[var(--muted-subtle)] text-[16px] sm:text-[13.5px] focus:outline-none focus:border-[var(--ink)]"
                   />
                 </div>
               </div>
@@ -679,7 +684,7 @@ export const JobModal: React.FC<JobModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-[var(--line-subtle)] flex items-center justify-between">
+          <div className="pt-3.5 border-t border-[var(--line-subtle)] flex items-center justify-between gap-2">
             {job && onDelete ? (
               <button
                 type="button"
@@ -689,13 +694,13 @@ export const JobModal: React.FC<JobModalProps> = ({
                     onClose();
                   }
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium text-[var(--danger)] hover:bg-[var(--danger-light)] rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-[13.5px] font-medium text-[var(--danger)] hover:bg-[var(--danger-light)] rounded-xl transition-colors cursor-pointer"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
                 <span>Delete</span>
               </button>
             ) : (
-              <span className="text-[11px] text-[var(--muted-subtle)] hidden sm:inline">
+              <span className="text-[12.5px] text-[var(--muted-subtle)] hidden sm:inline">
                 Press <kbd className="font-mono">Enter</kbd> to save
               </span>
             )}
@@ -704,14 +709,14 @@ export const JobModal: React.FC<JobModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1.5 text-[12px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] rounded-lg transition-colors cursor-pointer"
+                className="px-3.5 py-2 text-[13.5px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-1.5 text-[12px] font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] rounded-lg transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
+                className="px-4.5 py-2 text-[13.5px] font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] rounded-xl transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
               >
                 {saving ? 'Saving...' : job ? 'Save changes' : 'Add application'}
               </button>

@@ -55,7 +55,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           onAuthChange();
           onClose();
         } else {
-          onNotify('info', 'Check your email to confirm your account, or sign in if confirmation is disabled in Supabase.');
+          onNotify(
+            'info',
+            'Check your email to confirm your account, or sign in if confirmation is disabled in Supabase.'
+          );
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -122,35 +125,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/55 backdrop-blur-[2px] p-0 sm:p-4"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md bg-[var(--surface)] text-[var(--ink)] rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="relative w-full max-w-md bg-[var(--surface)] text-[var(--ink)] rounded-t-2xl sm:rounded-xl shadow-2xl border border-[var(--line)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--line-subtle)]">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <h2 className="text-[13px] font-semibold tracking-tight">
-              {userEmail ? 'Cloud Account' : mode === 'signin' ? 'Sign in to JobPulse' : 'Create a JobPulse Account'}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--line-subtle)]">
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-5 h-5 text-emerald-500" />
+            <h2 className="text-[15px] sm:text-[16px] font-semibold tracking-tight">
+              {userEmail
+                ? 'Cloud Account'
+                : mode === 'signin'
+                ? 'Sign in to JobPulse'
+                : 'Create a JobPulse Account'}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {!supabase ? (
-          <div className="p-5 space-y-3 text-center">
-            <Database className="w-7 h-7 text-[var(--muted)] mx-auto" />
-            <h3 className="text-[13px] font-semibold">Supabase Cloud Not Connected</h3>
-            <p className="text-[12px] text-[var(--muted)] leading-relaxed">
+          <div className="p-5 space-y-3.5 text-center">
+            <Database className="w-8 h-8 text-[var(--muted)] mx-auto" />
+            <h3 className="text-[15px] font-semibold">Supabase Cloud Not Connected</h3>
+            <p className="text-[13.5px] text-[var(--muted)] leading-relaxed">
               To enable multi-user accounts and cross-device cloud sync, connect your Supabase project URL and Anon Key first.
             </p>
             <button
@@ -159,56 +166,56 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onClose();
                 onOpenDatabaseSetup();
               }}
-              className="w-full py-2 rounded-lg bg-[var(--accent)] text-[var(--accent-ink)] text-[12px] font-semibold cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[var(--accent)] text-[var(--accent-ink)] text-[14px] font-semibold cursor-pointer"
             >
               Configure Supabase Connection
             </button>
           </div>
         ) : userEmail ? (
           <div className="p-5 space-y-4">
-            <div className="p-3.5 rounded-xl border border-[var(--line)] bg-[var(--bg)] flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                <UserCheck className="w-4 h-4" />
+            <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--bg)] flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                <UserCheck className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-[var(--muted)]">Signed in as</p>
-                <p className="text-[13px] font-semibold text-[var(--ink)] truncate">{userEmail}</p>
+                <p className="text-[12.5px] text-[var(--muted)]">Signed in as</p>
+                <p className="text-[14.5px] font-semibold text-[var(--ink)] truncate">{userEmail}</p>
               </div>
             </div>
 
-            <p className="text-[12px] text-[var(--muted)] leading-relaxed">
+            <p className="text-[13.5px] text-[var(--muted)] leading-relaxed">
               Your job pipeline, PDF CV Vault, and candidate profile are privately isolated to your account via Supabase Row-Level Security.
             </p>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 disabled={syncing}
                 onClick={handleSyncToAccount}
-                className="w-full py-2 px-3 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] text-[13.5px] font-semibold flex items-center justify-center gap-2 cursor-pointer"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
                 <span>{syncing ? 'Syncing...' : 'Sync local jobs & CVs to cloud account'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="w-full py-2 px-3 rounded-lg border border-[var(--line)] hover:bg-[var(--surface-hover)] text-[var(--danger)] text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl border border-[var(--line)] hover:bg-[var(--surface-hover)] text-[var(--danger)] text-[13.5px] font-semibold flex items-center justify-center gap-2 cursor-pointer"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" />
                 <span>Sign out</span>
               </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-5 space-y-3.5">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4">
             {/* Mode Switcher */}
-            <div className="grid grid-cols-2 p-0.5 rounded-lg bg-[var(--surface-subtle)] border border-[var(--line-subtle)]">
+            <div className="grid grid-cols-2 p-1 rounded-xl bg-[var(--surface-subtle)] border border-[var(--line-subtle)]">
               <button
                 type="button"
                 onClick={() => setMode('signin')}
-                className={`py-1.5 rounded-md text-[12px] font-medium transition-colors cursor-pointer ${
+                className={`py-2 rounded-lg text-[13.5px] font-semibold transition-colors cursor-pointer ${
                   mode === 'signin'
                     ? 'bg-[var(--surface)] text-[var(--ink)] shadow-2xs'
                     : 'text-[var(--muted)] hover:text-[var(--ink)]'
@@ -219,7 +226,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => setMode('signup')}
-                className={`py-1.5 rounded-md text-[12px] font-medium transition-colors cursor-pointer ${
+                className={`py-2 rounded-lg text-[13.5px] font-semibold transition-colors cursor-pointer ${
                   mode === 'signup'
                     ? 'bg-[var(--surface)] text-[var(--ink)] shadow-2xs'
                     : 'text-[var(--muted)] hover:text-[var(--ink)]'
@@ -230,7 +237,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-medium text-[var(--muted)] mb-1">
+              <label className="block text-[13px] font-medium text-[var(--muted)] mb-1.5">
                 Email address
               </label>
               <input
@@ -239,20 +246,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[13px] text-[var(--ink)] focus:outline-none focus:border-[var(--ink)]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[16px] sm:text-[14px] text-[var(--ink)] focus:outline-none focus:border-[var(--ink)]"
               />
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-medium text-[var(--muted)]">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[13px] font-medium text-[var(--muted)]">
                   Password
                 </label>
                 {mode === 'signin' && (
                   <button
                     type="button"
                     onClick={handleResetPassword}
-                    className="text-[11px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:underline cursor-pointer"
+                    className="text-[12.5px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:underline cursor-pointer"
                   >
                     Forgot password?
                   </button>
@@ -265,11 +272,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 placeholder="At least 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] text-[13px] text-[var(--ink)] focus:outline-none focus:border-[var(--ink)]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line)] bg-[var(--bg)] text-[16px] sm:text-[14px] text-[var(--ink)] focus:outline-none focus:border-[var(--ink)]"
               />
             </div>
 
-            <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+            <p className="text-[12.5px] text-[var(--muted)] leading-relaxed">
               {mode === 'signup'
                 ? 'Creating an account syncs your jobs, PDF CVs, and profile across your phone and laptop.'
                 : 'Sign in to access your synced job pipeline and CV Vault from any device.'}
@@ -278,7 +285,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] text-[12px] font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-ink)] text-[14px] font-semibold transition-all cursor-pointer disabled:opacity-50"
             >
               {loading
                 ? 'Please wait...'
@@ -292,4 +299,3 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     </div>
   );
 };
-

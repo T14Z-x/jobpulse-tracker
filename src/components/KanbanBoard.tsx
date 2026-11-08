@@ -52,7 +52,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-6 scrollbar-thin">
+    <div className="flex gap-3.5 overflow-x-auto pb-6 snap-x snap-mandatory sm:snap-none">
       {STATUS_LIST.map((status) => {
         const columnJobs = jobs.filter((j) => j.status === status);
 
@@ -61,30 +61,30 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             key={status}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
-            className="flex-1 min-w-[270px] flex flex-col rounded-xl bg-[var(--surface-subtle)]/50 border border-[var(--line-subtle)] p-2 min-h-[480px]"
+            className="flex-1 min-w-[290px] sm:min-w-[280px] snap-center flex flex-col rounded-xl bg-[var(--surface-subtle)]/50 border border-[var(--line-subtle)] p-2.5 min-h-[480px]"
           >
             {/* Column Header */}
             <div className="flex items-center justify-between px-2 py-1.5 mb-2">
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${STATUS_DOT[status]}`} />
-                <h4 className="text-[12px] font-semibold text-[var(--ink)] tracking-tight">
+                <span className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT[status]}`} />
+                <h4 className="text-[14px] font-semibold text-[var(--ink)] tracking-tight">
                   {status}
                 </h4>
-                <span className="text-[11px] font-medium text-[var(--muted)] tabular-nums">
+                <span className="text-[12.5px] font-medium text-[var(--muted)] tabular-nums">
                   {columnJobs.length}
                 </span>
               </div>
               <button
                 onClick={() => onQuickAdd(status)}
-                className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface)] transition-colors cursor-pointer"
                 title={`Add to ${status}`}
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
               </button>
             </div>
 
             {/* Column Cards */}
-            <div className="flex flex-col gap-2 flex-1">
+            <div className="flex flex-col gap-2.5 flex-1">
               {columnJobs.map((job) => (
                 <div
                   key={job.id}
@@ -106,7 +106,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 <button
                   type="button"
                   onClick={() => onQuickAdd(status)}
-                  className="flex-1 flex items-center justify-center p-4 text-center border border-dashed border-[var(--line)] hover:border-[var(--muted-subtle)] rounded-lg text-[11px] text-[var(--muted-subtle)] hover:text-[var(--muted)] transition-colors cursor-pointer"
+                  className="flex-1 flex items-center justify-center p-4 text-center border border-dashed border-[var(--line)] hover:border-[var(--muted-subtle)] rounded-xl text-[13px] text-[var(--muted)] hover:text-[var(--ink)] transition-colors cursor-pointer"
                 >
                   + Add {status.toLowerCase()}
                 </button>

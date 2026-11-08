@@ -291,7 +291,7 @@ export default function Home() {
       />
 
       {/* Main Workspace */}
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-5">
+      <main className="flex-1 w-full px-3.5 sm:px-6 lg:px-8 py-4 sm:py-5">
         {activeTab === 'discover' ? (
           <DiscoverFeed
             existingJobs={jobs}
@@ -314,50 +314,50 @@ export default function Home() {
               }}
             />
 
-            {/* Inline 2-Field Quick Capture Bar */}
+            {/* Inline Quick Capture Bar */}
             <form
               onSubmit={handleQuickAddSubmit}
-              className="mb-5 p-1.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 shadow-2xs"
+              className="mb-5 p-2 rounded-xl bg-[var(--surface)] border border-[var(--line)] flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 shadow-2xs"
             >
               <input
                 type="text"
-                placeholder="Quick log: Company (e.g. Linear)"
+                placeholder="Quick log: Company (e.g. BRAC Bank, Linear)"
                 value={quickCompany}
                 onChange={(e) => setQuickCompany(e.target.value)}
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-transparent text-[13px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:bg-[var(--bg)]"
+                className="flex-1 min-w-0 px-3 py-2 sm:py-1.5 rounded-lg bg-transparent text-[16px] sm:text-[14px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:bg-[var(--bg)]"
               />
-              <div className="hidden sm:block w-px h-4 bg-[var(--line-subtle)]" />
+              <div className="h-px sm:h-5 sm:w-px bg-[var(--line-subtle)]" />
               <input
                 type="text"
-                placeholder="Role (e.g. Product Engineer)"
+                placeholder="Role (e.g. Marketing Executive, Engineer)"
                 value={quickTitle}
                 onChange={(e) => setQuickTitle(e.target.value)}
-                className="flex-1 min-w-0 px-3 py-1.5 rounded-lg bg-transparent text-[13px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:bg-[var(--bg)]"
+                className="flex-1 min-w-0 px-3 py-2 sm:py-1.5 rounded-lg bg-transparent text-[16px] sm:text-[14px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:bg-[var(--bg)]"
               />
-              <div className="hidden md:block w-px h-4 bg-[var(--line-subtle)]" />
+              <div className="hidden md:block w-px h-5 bg-[var(--line-subtle)]" />
               <input
                 type="url"
                 placeholder="URL (optional)"
                 value={quickLink}
                 onChange={(e) => setQuickLink(e.target.value)}
-                className="hidden md:block w-48 px-3 py-1.5 rounded-lg bg-transparent text-[13px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:bg-[var(--bg)]"
+                className="hidden md:block w-52 px-3 py-1.5 rounded-lg bg-transparent text-[14px] text-[var(--ink)] placeholder-[var(--muted)] focus:outline-none focus:bg-[var(--bg)]"
               />
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1.5 pt-1 sm:pt-0 shrink-0">
                 <button
                   type="button"
                   onClick={() => handleOpenAddModal('Applied')}
-                  className="px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-2 sm:py-1.5 rounded-lg text-[13.5px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   title="Open full form with screenshots & notes"
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span className="hidden lg:inline">More</span>
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span>More</span>
                 </button>
                 <button
                   type="submit"
                   disabled={!quickCompany.trim() || !quickTitle.trim()}
-                  className="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-[var(--accent-ink)] text-[12px] font-medium flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-35"
+                  className="flex-1 sm:flex-initial px-4 py-2 sm:py-1.5 rounded-lg bg-[var(--accent)] text-[var(--accent-ink)] text-[13.5px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-35"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
                   <span>Log</span>
                 </button>
               </div>
@@ -386,19 +386,19 @@ export default function Home() {
             {/* Content View: Board vs Cards */}
             {loading ? (
               <div className="flex flex-col items-center justify-center p-16 text-center">
-                <p className="text-[12px] text-[var(--muted)]">Loading pipeline...</p>
+                <p className="text-[14px] text-[var(--muted)]">Loading pipeline...</p>
               </div>
             ) : filteredJobs.length === 0 ? (
               <div className="py-16 px-4 text-center rounded-xl border border-dashed border-[var(--line)] bg-[var(--surface)]/50 my-2">
-                <h3 className="text-[13px] font-semibold text-[var(--ink)]">
+                <h3 className="text-[15px] font-semibold text-[var(--ink)]">
                   {jobs.length ? 'No matching applications' : 'Your pipeline is empty'}
                 </h3>
-                <p className="text-[12px] text-[var(--muted)] mt-1 max-w-sm mx-auto">
+                <p className="text-[13.5px] text-[var(--muted)] mt-1.5 max-w-md mx-auto">
                   {jobs.length
                     ? 'Try clearing your search query or stage filter.'
                     : 'Browse live Bangladesh & International Remote roles in the Discover Jobs tab, or log one above.'}
                 </p>
-                <div className="mt-4 flex items-center justify-center gap-2">
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
                   {(query || selectedStatus !== 'All' || selectedWorkplace !== 'All' || onlyDue) && (
                     <button
                       onClick={() => {
@@ -407,16 +407,16 @@ export default function Home() {
                         setSelectedWorkplace('All');
                         setOnlyDue(false);
                       }}
-                      className="px-3 py-1.5 text-[12px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] rounded-lg transition-colors border border-[var(--line)] cursor-pointer"
+                      className="px-3.5 py-2 text-[13.5px] font-medium text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-hover)] rounded-xl transition-colors border border-[var(--line)] cursor-pointer"
                     >
                       Clear filters
                     </button>
                   )}
                   <button
                     onClick={() => setActiveTab('discover')}
-                    className="px-3.5 py-1.5 text-[12px] font-medium bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2 text-[13.5px] font-semibold bg-[var(--accent)] text-[var(--accent-ink)] hover:bg-[var(--accent-hover)] rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
                   >
-                    <Compass className="w-3.5 h-3.5" />
+                    <Compass className="w-4 h-4" />
                     <span>Discover Live Jobs</span>
                   </button>
                 </div>
@@ -431,7 +431,7 @@ export default function Home() {
                 onQuickAdd={(st) => handleOpenAddModal(st)}
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 pb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 pb-8">
                 {filteredJobs.map((job) => (
                   <JobCard
                     key={job.id}
@@ -449,10 +449,10 @@ export default function Home() {
         )}
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="mt-auto border-t border-[var(--line-subtle)] py-4 text-xs text-[var(--muted)]">
-        <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
-          <div className="flex items-center gap-2">
+      {/* Footer */}
+      <footer className="mt-auto border-t border-[var(--line-subtle)] py-4 text-[var(--muted)]">
+        <div className="w-full px-3.5 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[12.5px] sm:text-[13px]">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="font-semibold text-[var(--ink)]">JobPulse</span>
             <span>·</span>
             <span>
@@ -461,11 +461,20 @@ export default function Home() {
                 href="https://t14z.vercel.app"
                 target="_blank"
                 rel="author noreferrer"
-                className="font-medium text-[var(--ink)] hover:underline underline-offset-2"
+                className="font-semibold text-[var(--ink)] hover:underline underline-offset-2"
               >
                 Gazi Asif Imtiaz
               </a>
             </span>
+            <span>·</span>
+            <a
+              href="https://github.com/T14Z-x/jobpulse-tracker"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[var(--ink)] transition-colors"
+            >
+              GitHub
+            </a>
           </div>
           <div className="flex items-center gap-3">
             <button
