@@ -20,3 +20,4 @@ Thank you for your interest in contributing to **JobPulse**!
    ```
 
 Created and maintained by **[Gazi Asif Imtiaz](https://t14z.vercel.app)**.
+
